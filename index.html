@@ -5,18 +5,21 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FakeDetect — 데모</title>
   <style>
+    /* [수정] fakeoff.in 스타일의 미니멀한 색상 팔레트 */
     :root {
-      --bg: #f6f8fb;
+      --bg: #f9fafb; /* 매우 밝은 회색 배경 */
       --card: #ffffff;
-      --accent: #0b76ef;
+      --accent: #111827; /* 짙은 회색 (주요 색상) */
       --danger: #ef4444;
       --muted: #6b7280;
+      --border: #e5e7eb; /* 연한 테두리선 */
     }
     html,body{height:100%;}
     body{
       margin:0;
       font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(180deg,#f6f8fb 0%, #eef3fb 100%);
+      /* [수정] 그라데이션 제거, 단색 배경 */
+      background: var(--bg);
       display:flex;
       align-items:flex-start;
       justify-content:center;
@@ -25,7 +28,8 @@
     }
     .wrap{
       width:100%;
-      max-width:980px;
+      /* [수정] 1단 레이아웃에 맞게 최대 너비 조정 */
+      max-width: 720px;
     }
     header{
       display:flex;
@@ -35,115 +39,161 @@
     }
     .brand{display:flex;align-items:center;gap:12px;}
     .logo{
-      width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7cc3ff);
+      width:48px;height:48px;border-radius:10px;
+      /* [수정] 로고 스타일 변경 */
+      background: var(--accent);
       display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;
-      box-shadow:0 6px 18px rgba(11,118,239,0.18);
+      box-shadow: none; /* 그림자 제거 */
     }
     h1{font-size:20px;margin:0;}
     p.lead{margin:0;color:var(--muted);font-size:13px;}
 
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:22px;}
+    /* [수정] 1단 스택 레이아웃으로 변경 */
+    .grid{
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+    }
     .card{
       background:var(--card);
       border-radius:14px;
-      padding:18px;
-      box-shadow:0 6px 20px rgba(15,23,42,0.06);
+      padding: 22px 24px;
+      /* [수정] 테두리선 추가, 그림자 약하게 */
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(15,23,42,0.04);
     }
+
+    /* [추가] URL 입력창 스타일 */
+    .url-input-group {
+      margin-bottom: 16px;
+    }
+    .url-input-group input {
+      width: 100%;
+      box-sizing: border-box; /* 패딩 포함 크기 계산 */
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      background: #fdfdfd;
+    }
+    .url-input-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.05);
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin: 20px 0;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border);
+    }
+    .divider:not(:empty)::before { margin-right: .5em; }
+    .divider:not(:empty)::after { margin-left: .5em; }
+
 
     /* upload area */
     .uploader{
-      border:2px dashed rgba(15,23,42,0.06);
-      border-radius:10px;padding:16px; text-align:center;
-      background:linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
-      /* [수정] 애니메이션을 위한 transition 추가 */
-      transition: border-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+      /* [수정] fakeoff.in 스타일의 업로더 */
+      border:2px dashed var(--border);
+      border-radius:10px;padding:24px; text-align:center;
+      background: #fafcff;
+      transition: border-color 300ms ease, box-shadow 300ms ease;
     }
     .uploader.dragover{
       border-color:var(--accent);
-      box-shadow:0 10px 30px rgba(11,118,239, 0.12);
-      transform: scale(1.01); /* 드래그 시 살짝 확대 */
+      box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
     }
     .uploader input{display:none;}
     .btn{
-      display:inline-block;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;font-weight:600;
+      display:inline-block;padding:10px 14px;border-radius:10px;
+      /* [수정] 버튼 스타일 변경 */
+      background:var(--accent);
+      color:white;font-weight:600;
       cursor:pointer;text-decoration:none;margin-top:10px;
-      /* [수정] 애니메이션을 위한 transition 추가 */
       transition: background-color 200ms ease, transform 200ms ease, opacity 200ms ease;
     }
-    /* [추가] 버튼 비활성화 시 스타일 */
+    .btn:hover { background: #333; }
     .btn:disabled {
-      background: #b0bec5;
-      opacity: 0.6;
+      background: #9ca3af;
+      opacity: 0.7;
       cursor: not-allowed;
       transform: scale(1);
     }
     .muted{color:var(--muted);font-size:13px;margin-top:6px;}
 
     /* preview */
-    #preview{width:100%;max-height:420px;border-radius:10px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
+    #preview{width:100%;max-height:420px;border-radius:10px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center; border: 1px solid var(--border);}
     #preview video, #preview img {
       width:100%;height:auto;display:block;
-      animation: fadeIn 500ms ease forwards; /* [추가] 미리보기 페이드인 */
+      animation: fadeIn 500ms ease forwards;
     }
 
     .controls{display:flex;gap:8px;margin-top:12px;align-items:center;}
     .ghost{background:#f3f4f6;padding:8px 12px;border-radius:8px;color:var(--muted);font-size:13px;}
 
     /* result */
+    /* [추가] 결과 섹션 기본 숨김 */
+    #resultSection {
+      display: none;
+    }
+
     .result-score{font-size:34px;font-weight:700;margin:8px 0;}
     .result-label{font-weight:700;padding:6px 10px;border-radius:999px;font-size:13px;color:white;display:inline-block;}
     .label-fake{background:var(--danger);}
     .label-real{background:#10b981;}
 
     .bar{
-      height:12px;border-radius:999px;background:#e6eefc;margin-top:10px;overflow:hidden;
+      height:12px;border-radius:999px; background: #f3f4f6; /* [수정] 바 배경색 */
+       margin-top:10px;overflow:hidden;
     }
-    .bar > .fill{height:100%;background:linear-gradient(90deg,var(--accent),#7cc3ff);width:0%;transition:width 550ms ease;}
+    .bar > .fill{height:100%; 
+      /* [수정] 바 색상 변경 */
+      background: var(--accent); 
+      width:0%;transition:width 550ms ease;
+    }
 
     .evidence{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-    .thumb{width:96px;height:64px;border-radius:8px;overflow:hidden;background:#111;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;}
+    .thumb{width:96px;height:64px;border-radius:8px;overflow:hidden;background:#111;display:flex;align:items:center;justify-content:center;color:white;font-size:12px; border: 1px solid #333;}
 
-    footer{margin-top:18px;font-size:13px;color:var(--muted);}
+    footer{margin-top:18px;font-size:13px;color:var(--muted); text-align: center;}
     small.note{color:var(--muted);display:block;margin-top:10px;font-size:13px;}
 
     /* responsive */
     @media(max-width:880px){
-      .grid{grid-template-columns:1fr; }
-      .brand h1{font-size:18px;}
+      /* 1단 레이아웃이라 반응형 CSS 불필요 */
     }
 
-    /* ----- [추가] 애니메이션 ----- */
+    /* ----- 애니메이션 ----- */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    /* ----- [추가] 결과 영역 애니메이션 ----- */
     #resultArea > div {
-      /* 결과 카드 전체가 페이드인 */
       animation: fadeIn 600ms ease forwards;
     }
-
-    /* 결과 내부 요소 순차적 애니메이션 */
     .result-score {
-        animation: fadeIn 400ms 100ms ease backwards; /* 100ms 딜레이 */
+        animation: fadeIn 400ms 100ms ease backwards;
     }
     .result-label {
-        animation: fadeIn 400ms 200ms ease backwards; /* 200ms 딜레이 */
+        animation: fadeIn 400ms 200ms ease backwards;
     }
     .bar {
-        animation: fadeIn 400ms 300ms ease backwards; /* 300ms 딜레이 */
+        animation: fadeIn 400ms 300ms ease backwards;
     }
-
-    /* 증거 썸네일 순차 등장 */
     .evidence .thumb {
         animation: fadeIn 400ms ease forwards;
-        opacity: 0; /* 기본 숨김 */
+        opacity: 0;
     }
     .evidence .thumb:nth-child(1) { animation-delay: 500ms; }
     .evidence .thumb:nth-child(2) { animation-delay: 600ms; }
     .evidence .thumb:nth-child(3) { animation-delay: 700ms; }
-    
   </style>
 </head>
 <body>
@@ -161,8 +211,15 @@
       </div>
     </header>
 
-    <div class="grid">
+        <div class="grid">
             <section class="card">
+
+        <div class="url-input-group">
+          <input type="text" id="urlInput" placeholder="비디오 URL 붙여넣기 (예: https://youtube.com/...)">
+        </div>
+        
+        <div class="divider">또는</div>
+
         <div class="uploader" id="uploader">
           <input type="file" id="fileInput" accept="video/*,image/*" />
           <div>
@@ -184,7 +241,7 @@
         <small class="note">※ 현재는 데모 모드입니다. 실제 모델과 연결하려면 서버 주소를 설정하세요.</small>
       </section>
 
-            <aside class="card">
+            <section class="card" id="resultSection">
         <h3>분석 결과</h3>
         <div id="resultArea" style="margin-top:8px;">
           <div class="muted">아직 분석이 이루어지지 않았습니다.</div>
@@ -193,11 +250,11 @@
         <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff;">
         <h4>빠른 설명</h4>
         <p class="muted" style="margin:6px 0;">- 비디오의 얼굴/입 모양·오디오 싱크·합성 아티팩트를 검사합니다.<br>- 데모는 클라이언트 시뮬레이션 결과를 사용합니다.</p>
-      </aside>
+      </section>
     </div>
 
     <footer>
-      <div style="display:flex;justify-content:space-between;gap:16px;align-items:center;">
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:center; flex-direction: column;">
         <div>© Team Global Creation</div>
         <div class="muted">배포: GitHub Pages / 실제 분석은 서버 연동 필요</div>
       </div>
@@ -205,40 +262,54 @@
   </div>
 
 <script>
-  // ----- 설정: 실제 서버 주소로 바꾸면 fetch 주석 해제하고 사용하세요. -----
-  const ANALYZE_API_URL = ""; // 예: "https://api.yourdomain.com/analyze"
-  // ------------------------------------------------------------
+  // ----- 설정 -----
+  const ANALYZE_API_URL = ""; 
+  // ----------------
 
   const uploader = document.getElementById('uploader');
   const fileInput = document.getElementById('fileInput');
   const pickBtn = document.getElementById('pickBtn');
+  const urlInput = document.getElementById('urlInput'); // [추가] URL 입력창
   const preview = document.getElementById('preview');
   const analyzeBtn = document.getElementById('analyzeBtn');
   const status = document.getElementById('status');
+  const resultSection = document.getElementById('resultSection'); // [추가] 결과 섹션
   const resultArea = document.getElementById('resultArea');
 
   let currentFile = null;
 
   // 드래그 & 드롭
-  ['dragenter','dragover'].forEach(evt => {
-    uploader.addEventListener(evt, e => {
-      e.preventDefault(); e.stopPropagation();
-      uploader.classList.add('dragover');
-    });
-  });
-  ['dragleave','drop'].forEach(evt => {
-    uploader.addEventListener(evt, e => {
-      e.preventDefault(); e.stopPropagation();
-      uploader.classList.remove('dragover');
-    });
-  });
+  ['dragenter','dragover'].forEach(evt => uploader.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation(); uploader.classList.add('dragover');
+  }));
+  ['dragleave','drop'].forEach(evt => uploader.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation(); uploader.classList.remove('dragover');
+  }));
   uploader.addEventListener('drop', e => {
     const f = e.dataTransfer.files[0];
+    urlInput.value = ''; // URL 입력창 비우기
     handleFile(f);
   });
 
   pickBtn.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+  fileInput.addEventListener('change', e => {
+    urlInput.value = ''; // URL 입력창 비우기
+    handleFile(e.target.files[0]);
+  });
+
+  // [추가] URL 입력 시 파일 상태 초기화
+  urlInput.addEventListener('input', () => {
+    if (urlInput.value.trim().length > 0) {
+      currentFile = null;
+      preview.innerHTML = '<div style="color: #cbd5e1;">URL로 분석 시 미리보기가 지원되지 않습니다.</div>';
+      fileInput.value = ''; // 파일 선택 초기화
+      analyzeBtn.disabled = false;
+      status.textContent = 'URL 준비됨';
+    } else {
+      analyzeBtn.disabled = true;
+      status.textContent = '대기 중';
+    }
+  });
 
   function handleFile(file) {
     if (!file) return;
@@ -253,15 +324,11 @@
     if (file.type.startsWith('video')) {
       const url = URL.createObjectURL(file);
       const video = document.createElement('video');
-      video.src = url;
-      video.controls = true;
-      video.muted = true;
-      video.playsInline = true;
-      preview.appendChild(video);
+      video.src = url; video.controls = true; video.muted = true;
+      video.playsInline = true; preview.appendChild(video);
     } else if (file.type.startsWith('image')) {
       const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
-      img.style.maxWidth = '100%';
+      img.src = URL.createObjectURL(file); img.style.maxWidth = '100%';
       preview.appendChild(img);
     } else {
       preview.textContent = '미리보기 불가한 파일입니다.';
@@ -269,35 +336,37 @@
   }
 
   analyzeBtn.addEventListener('click', async () => {
-    if (!currentFile) return;
+    const urlValue = urlInput.value.trim();
+    if (!currentFile && urlValue.length === 0) return; // 파일과 URL 둘 다 없으면 중단
+
     analyzeBtn.disabled = true;
     status.textContent = '분석 중...';
+    // [수정] 분석 시작 시 결과 섹션 숨기기
+    resultSection.style.display = 'none'; 
     resultArea.innerHTML = '';
 
-    // 실제 서버가 있으면 아래 multipart/form-data로 보내서 결과 받으면 됨.
-    // 예:
+    // [수정] 실제 서버 전송 로직 (파일 또는 URL)
     /*
-    const form = new FormData();
-    form.append('file', currentFile);
+    const form = new FormData();
+    if (currentFile) {
+      form.append('file', currentFile);
+    } else {
+      form.append('url', urlValue);
+    }
     const resp = await fetch(ANALYZE_API_URL, { method: 'POST', body: form });
     const data = await resp.json();
     showResult(data);
     */
 
     // -- 데모: 클라이언트 모의 분석 --
-    await sleep(700); // fake preprocessing
+    await sleep(700); 
     await simulateProgress();
-
-    // 모의 확률 (랜덤)
-    const fakeProbability = Math.round((0.15 + Math.random()*0.8)*100); // 15~95
+    const fakeProbability = Math.round((0.15 + Math.random()*0.8)*100); 
     const isFake = fakeProbability > 50;
     const data = {
       prediction: fakeProbability/100,
       label: isFake ? 'fake' : 'real',
-      evidence: {
-        heatmaps: [],
-        keyframes: []
-      },
+      evidence: { keyframes: [] },
       model_version: 'demo-v0.1'
     };
     showResult(data);
@@ -305,12 +374,14 @@
     status.textContent = '완료';
   });
 
-  // [수정된 함수]
+  // [수정]
   function showResult(data) {
+    // [수정] 결과 섹션 표시
+    resultSection.style.display = 'block'; 
+
     const pct = Math.round(data.prediction * 100);
     const label = data.label === 'fake' ? '가짜 의심' : '진짜 가능성 높음';
     
-    // 1. 먼저 HTML 구조를 삽입 (점수는 0%에서 시작, 바 너비는 0%에서 시작)
     resultArea.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:flex-start;">
         <div class="result-score">0%</div> 
@@ -323,21 +394,17 @@
       </div>
     `;
 
-    // 2. DOM 요소가 생성된 후, 애니메이션 트리거
     const scoreEl = resultArea.querySelector('.result-score');
     const barFillEl = resultArea.querySelector('.bar > .fill');
 
-    // 3. 점수 카운트업 애니메이션 실행
     if (scoreEl) {
-      animateCountUp(scoreEl, pct, 1200); // 1.2초 동안 카운트업
+      animateCountUp(scoreEl, pct, 1200); 
     }
     
-    // 4. 바 채우기 애니메이션 (CSS transition이 처리하도록 딜레이 후 width 설정)
     setTimeout(() => {
       if (barFillEl) barFillEl.style.width = `${pct}%`;
-    }, 400); // CSS 딜레이(300ms)보다 약간 늦게 시작
+    }, 400); 
 
-    // 증거(예시 썸네일) 추가
     const ev = document.getElementById('evidenceArea');
     if (ev) {
       for (let i=0;i<3;i++){
@@ -346,43 +413,33 @@
         ev.appendChild(d);
       }
     }
+    
+    // [추가] 결과가 표시된 후 스크롤
+    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   // 간단한 프로그레스 시뮬레이터
   async function simulateProgress(){
     const steps = [300, 500, 800, 400];
-    for (let v of steps){
-      await sleep(v);
-    }
+    for (let v of steps){ await sleep(v); }
   }
   function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-  // [추가된 헬퍼 함수]
-  /**
-   * 숫자 카운트업 애니메이션
-   * @param {HTMLElement} el - 숫자를 표시할 요소
-   * @param {number} toValue - 최종 값
-   * @param {number} duration - 애니메이션 시간 (ms)
-   */
+  // 숫자 카운트업 애니메이션
   function animateCountUp(el, toValue, duration = 1200) {
     const startTime = performance.now();
-    const startValue = 0; // 항상 0에서 시작
+    const startValue = 0; 
 
     function step(currentTime) {
       const elapsedTime = currentTime - startTime;
       if (elapsedTime >= duration) {
-        el.textContent = `${toValue}%`; // 최종 값 설정
-        return;
+        el.textContent = `${toValue}%`; return;
       }
-      
       const progress = elapsedTime / duration;
-      // Easing (ease-out-cubic): 부드럽게 감속
       const currentVal = Math.round(startValue + (toValue - startValue) * (1 - Math.pow(1 - progress, 3)));
       el.textContent = `${currentVal}%`;
-      
       requestAnimationFrame(step);
     }
-    
     requestAnimationFrame(step);
   }
 
