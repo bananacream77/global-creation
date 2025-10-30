@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FakeDetect — 데모</title>
+  <title>Deefy</title>
   <style>
     :root {
       --bg: #f6f8fb;
@@ -101,12 +101,12 @@
       <div class="brand">
         <div class="logo">FD</div>
         <div>
-          <h1>FakeDetect — 딥페이크 탐지 데모</h1>
-          <p class="lead">영상 업로드 후 AI가 진위확률을 판정합니다 (데모용).</p>
+          <h1>Deefy — 딥페이크 탐지 </h1>
+          <p class="lead">영상 업로드 후 AI가 진위확률을 판정합니다.</p>
         </div>
       </div>
       <div>
-        <a class="btn" id="aboutBtn">팀 소개</a>
+        <a class="btn" id="aboutBtn"> 소개</a>
       </div>
     </header>
 
@@ -258,7 +258,7 @@
 
   function showResult(data) {
     const pct = Math.round(data.prediction * 100);
-    const label = data.label === 'fake' ? '가짜 의심' : '진짜 가능성 높음';
+    const label = data.label === 'fake' ? '가짜 의심' : '진짜일 가능성 높음';
     resultArea.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:flex-start;">
         <div class="result-score">${pct}%</div>
