@@ -1,34 +1,240 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deefy — 딥페이크 탐지</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Deefy</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --accent: #0b76ef;
+      --danger: #ef4444;
+      --muted: #6b7280;
+    }
+    html,body{height:100%;margin:0;font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{
+      background: linear-gradient(180deg,#f6f8fb 0%, #eef3fb 100%);
+      display:flex;align-items:flex-start;justify-content:center;
+      padding:48px 20px;color:#0f172a;
+    }
+    .wrap{width:100%;max-width:980px;}
+
+    /* header */
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+    .brand{display:flex;align-items:center;gap:12px;}
+    .logo{
+      width:48px;height:48px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),#7cc3ff);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;
+      box-shadow:0 6px 18px rgba(11,118,239,0.18);
+    }
+    h1{font-size:20px;margin:0;}
+    p.lead{margin:0;color:var(--muted);font-size:13px;}
+
+    /* hamburger button */
+    .menu-btn {
+      background:none;
+      border:none;
+      cursor:pointer;
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+    }
+    .menu-btn span {
+      display:block;
+      width:22px;
+      height:2px;
+      background:#fff;
+      transition:0.3s;
+    }
+
+    /* menu overlay */
+    .menu-overlay {
+      position:fixed;
+      top:0;left:0;
+      width:100%;
+      height:100%;
+      background:#07131e;
+      color:white;
+      display:none;
+      flex-direction:column;
+      padding:40px;
+      z-index:1000;
+    }
+    .menu-overlay.active {display:flex;}
+
+    .menu-overlay .close-btn {
+      align-self:flex-end;
+      font-size:24px;
+      cursor:pointer;
+    }
+
+    .menu-overlay nav {
+      margin-top:60px;
+      display:flex;
+      flex-direction:column;
+      gap:30px;
+      font-weight:700;
+      font-size:22px;
+    }
+
+    .menu-item {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      cursor:pointer;
+      text-transform:uppercase;
+      font-family: "Orbitron", sans-serif;
+    }
+    .menu-item span {transition:transform 0.2s;}
+    .menu-item:hover span {transform:rotate(90deg);}
+    .submenu {
+      display:none;
+      margin-top:10px;
+      margin-left:10px;
+      font-size:15px;
+      color:#9ca3af;
+      flex-direction:column;
+      gap:6px;
+    }
+    .submenu.active {display:flex;}
+
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:22px;}
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      padding:18px;
+      box-shadow:0 6px 20px rgba(15,23,42,0.06);
+    }
+    .uploader{border:2px dashed rgba(15,23,42,0.06);border-radius:10px;padding:16px;text-align:center;background:linear-gradient(180deg, rgba(255,255,255,0.6), transparent);}
+    .uploader.dragover{border-color:var(--accent);box-shadow:0 10px 30px rgba(11,118,239,0.06);}
+    .uploader input{display:none;}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;font-weight:600;cursor:pointer;text-decoration:none;margin-top:10px;}
+    .muted{color:var(--muted);font-size:13px;margin-top:6px;}
+    #preview{width:100%;max-height:420px;border-radius:10px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
+    #preview video{width:100%;height:auto;display:block;}
+    .controls{display:flex;gap:8px;margin-top:12px;align-items:center;}
+    .ghost{background:#f3f4f6;padding:8px 12px;border-radius:8px;color:var(--muted);font-size:13px;}
+    .result-score{font-size:34px;font-weight:700;margin:8px 0;}
+    .result-label{font-weight:700;padding:6px 10px;border-radius:999px;font-size:13px;color:white;display:inline-block;}
+    .label-fake{background:var(--danger);}
+    .label-real{background:#10b981;}
+    .bar{height:12px;border-radius:999px;background:#e6eefc;margin-top:10px;overflow:hidden;}
+    .bar > .fill{height:100%;background:linear-gradient(90deg,var(--accent),#7cc3ff);width:0%;transition:width 550ms ease;}
+    .evidence{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+    .thumb{width:96px;height:64px;border-radius:8px;overflow:hidden;background:#111;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;}
+    footer{margin-top:18px;font-size:13px;color:var(--muted);}
+    small.note{color:var(--muted);display:block;margin-top:10px;font-size:13px;}
+
+    @media(max-width:880px){.grid{grid-template-columns:1fr;}.brand h1{font-size:18px;}}
+  </style>
 </head>
-<body class="analyze">
-  <header>
-    <h1>Deefy — 딥페이크 탐지</h1>
-    <p>영상 업로드 후 AI가 진위확률을 판단합니다.</p>
-  </header>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">FD</div>
+        <div>
+          <h1>Deefy — 딥페이크 탐지</h1>
+          <p class="lead">영상 업로드 후 AI가 진위확률을 판정합니다.</p>
+        </div>
+      </div>
+      <button class="menu-btn" id="menuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </header>
 
-  <main class="analyze-box">
-    <div class="upload-box">
-      <p>파일을 드래그하거나 클릭하여 업로드하세요</p>
-      <small>MP4, MOV, WEBM 등 (최대 100MB 권장)</small>
-      <input type="file" id="fileInput" accept="video/*" />
-      <button class="btn-primary">분석 시작</button>
-      <div class="preview">미리보기가 여기에 표시됩니다</div>
+    <!-- 메뉴 오버레이 -->
+    <div class="menu-overlay" id="menuOverlay">
+      <div class="close-btn" id="closeMenu">✕</div>
+      <nav>
+        <div class="menu-item" data-target="intro">CATEGORY <span>⌄</span></div>
+        <div class="submenu" id="intro">
+          <div>소개</div>
+          <div>모델</div>
+          <div>팀원</div>
+        </div>
+
+        <div class="menu-item" data-target="account">MY ACCOUNT <span>⌄</span></div>
+        <div class="submenu" id="account">
+          <div>로그인</div>
+          <div>회원가입</div>
+        </div>
+
+        <div class="menu-item" data-target="order">MY ORDER <span>⌄</span></div>
+        <div class="submenu" id="order">
+          <div>주문 내역</div>
+          <div>배송 조회</div>
+        </div>
+
+        <div class="menu-item" data-target="help">HELP <span>⌄</span></div>
+        <div class="submenu" id="help">
+          <div>FAQ</div>
+          <div>문의하기</div>
+        </div>
+      </nav>
     </div>
 
-    <div class="result-box">
-      <h2>분석 결과</h2>
-      <p>아직 분석이 이루어지지 않았습니다.</p>
-    </div>
-  </main>
+    <!-- 기존 내용 -->
+    <div class="grid">
+      <section class="card">
+        <div class="uploader" id="uploader">
+          <input type="file" id="fileInput" accept="video/*,image/*" />
+          <div>
+            <strong>파일을 드래그하거나 클릭하여 업로드하세요</strong>
+            <div class="muted">MP4, MOV, WEBM 등 (최대 100MB 권장)</div>
+            <button class="btn" id="pickBtn">파일 선택</button>
+          </div>
+        </div>
 
-  <footer>
-    <p>© Team Global Creation — GitHub Pages / 실제 분석은 서버 연동 필요</p>
-  </footer>
+        <div id="preview" style="margin-top:14px;">
+          <div style="color:#cbd5e1;">미리보기가 여기에 표시됩니다</div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="analyzeBtn" disabled>분석 시작</button>
+          <div class="ghost" id="status">대기 중</div>
+        </div>
+
+        <small class="note">※ 현재는 데모 모드입니다. 실제 모델과 연결하려면 서버 주소를 설정하세요.</small>
+      </section>
+
+      <aside class="card">
+        <h3>분석 결과</h3>
+        <div id="resultArea" style="margin-top:8px;">
+          <div class="muted">아직 분석이 이루어지지 않았습니다.</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:center;">
+        <div>© Team Global Creation</div>
+        <div class="muted">배포: GitHub Pages / 실제 분석은 서버 연동 필요</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // 햄버거 메뉴 열기/닫기
+    const menuBtn = document.getElementById('menuBtn');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const closeMenu = document.getElementById('closeMenu');
+
+    menuBtn.addEventListener('click', () => menuOverlay.classList.add('active'));
+    closeMenu.addEventListener('click', () => menuOverlay.classList.remove('active'));
+
+    // 서브메뉴 토글
+    document.querySelectorAll('.menu-item').forEach(item=>{
+      item.addEventListener('click',()=>{
+        const target = document.getElementById(item.dataset.target);
+        target.classList.toggle('active');
+      });
+    });
+  </script>
 </body>
 </html>
