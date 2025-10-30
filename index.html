@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Deefy — 딥페이크 탐지 사이트 (Fakeoff 스타일 애니메이션)</title>
+  <title>FakeDetect — 데모</title>
   <style>
     :root {
       --bg: #f6f8fb;
@@ -42,136 +42,108 @@
     h1{font-size:20px;margin:0;}
     p.lead{margin:0;color:var(--muted);font-size:13px;}
 
-    /* 그리드 구조 단순화 */
-    .grid{display:flex; justify-content:center; gap:22px;}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:22px;}
     .card{
       background:var(--card);
       border-radius:14px;
-      padding:28px; /* 패딩 증가 */
+      padding:18px;
       box-shadow:0 6px 20px rgba(15,23,42,0.06);
-      width: 100%;
-      max-width: 700px;
-      position: relative;
-      overflow: hidden;
     }
 
-    /* 전환 애니메이션을 위한 컨테이너 */
-    .main-content-wrapper {
-      position: relative;
-      /* 높이 지정 */
-      min-height: 400px; 
-    }
-    .content-panel {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      transition: opacity 500ms ease, transform 500ms ease;
-    }
-
-    /* 업로드/미리보기 패널 (초기 상태) */
-    #upload-panel {
-      z-index: 2;
-      opacity: 1;
-      transform: scale(1);
-    }
-    .is-result-show #upload-panel {
-      z-index: 1;
-      opacity: 0;
-      transform: scale(0.9); /* 작아지면서 사라짐 */
-      pointer-events: none;
-    }
-
-    /* 결과 패널 */
-    #result-panel {
-      z-index: 1;
-      opacity: 0;
-      transform: scale(1.1); /* 커지면서 나타남 */
-      pointer-events: none;
-    }
-    .is-result-show #result-panel {
-      z-index: 2;
-      opacity: 1;
-      transform: scale(1);
-      pointer-events: all;
-      transition-delay: 100ms; /* 약간 지연 후 나타나게 */
-    }
-    
     /* upload area */
     .uploader{
       border:2px dashed rgba(15,23,42,0.06);
-      border-radius:10px;padding:30px; text-align:center;
+      border-radius:10px;padding:16px; text-align:center;
       background:linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+      /* [수정] 애니메이션을 위한 transition 추가 */
+      transition: border-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
     }
-    .uploader.dragover{border-color:var(--accent);box-shadow:0 10px 30px rgba(11,118,239,0.06);}
+    .uploader.dragover{
+      border-color:var(--accent);
+      box-shadow:0 10px 30px rgba(11,118,239, 0.12);
+      transform: scale(1.01); /* 드래그 시 살짝 확대 */
+    }
     .uploader input{display:none;}
     .btn{
-      display:inline-block;padding:10px 18px;border-radius:10px;background:var(--accent);color:white;font-weight:600;
-      cursor:pointer;text-decoration:none;margin-top:14px;
-      transition: background 200ms ease;
+      display:inline-block;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;font-weight:600;
+      cursor:pointer;text-decoration:none;margin-top:10px;
+      /* [수정] 애니메이션을 위한 transition 추가 */
+      transition: background-color 200ms ease, transform 200ms ease, opacity 200ms ease;
     }
-    .btn:hover{background:#0a68d8;}
+    /* [추가] 버튼 비활성화 시 스타일 */
+    .btn:disabled {
+      background: #b0bec5;
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
     .muted{color:var(--muted);font-size:13px;margin-top:6px;}
 
     /* preview */
-    #preview-area{
-      margin-top:18px;
-      border-radius:10px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;
-      max-height: 420px;
-    }
-    #preview-area video{width:100%;height:auto;display:block;}
-    .placeholder{color: #cbd5e1; padding: 100px 20px;}
+    #preview{width:100%;max-height:420px;border-radius:10px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
+    #preview video, #preview img {
+      width:100%;height:auto;display:block;
+      animation: fadeIn 500ms ease forwards; /* [추가] 미리보기 페이드인 */
+    }
 
-    .controls{display:flex;gap:8px;margin-top:18px;align-items:center; justify-content: space-between;}
+    .controls{display:flex;gap:8px;margin-top:12px;align-items:center;}
     .ghost{background:#f3f4f6;padding:8px 12px;border-radius:8px;color:var(--muted);font-size:13px;}
-    
-    /* result styling */
-    .result-title {font-size: 24px; font-weight: 700; margin-bottom: 20px;}
-    .result-score{font-size:48px;font-weight:800;margin:10px 0;}
-    .result-label{font-weight:700;padding:8px 14px;border-radius:999px;font-size:15px;color:white;display:inline-block;}
+
+    /* result */
+    .result-score{font-size:34px;font-weight:700;margin:8px 0;}
+    .result-label{font-weight:700;padding:6px 10px;border-radius:999px;font-size:13px;color:white;display:inline-block;}
     .label-fake{background:var(--danger);}
     .label-real{background:#10b981;}
 
     .bar{
-      height:16px;border-radius:999px;background:#e6eefc;margin:20px 0;overflow:hidden;
+      height:12px;border-radius:999px;background:#e6eefc;margin-top:10px;overflow:hidden;
     }
     .bar > .fill{height:100%;background:linear-gradient(90deg,var(--accent),#7cc3ff);width:0%;transition:width 550ms ease;}
 
-    .evidence{margin-top:20px; padding-top: 20px; border-top: 1px solid #eef2ff;}
-    .evidence-list{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;}
-    .thumb{width:100px;height:70px;border-radius:8px;overflow:hidden;background:#111;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;}
+    .evidence{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+    .thumb{width:96px;height:64px;border-radius:8px;overflow:hidden;background:#111;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;}
 
-    footer{margin-top:28px;font-size:13px;color:var(--muted); text-align: center;}
+    footer{margin-top:18px;font-size:13px;color:var(--muted);}
     small.note{color:var(--muted);display:block;margin-top:10px;font-size:13px;}
-    small.note.danger{color:var(--danger);}
 
-    /* 로딩 시퀀스 */
-    .loading-overlay {
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 255, 255, 0.9);
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column;
-      z-index: 10;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 300ms ease, visibility 0ms linear 300ms;
-    }
-    .is-loading .loading-overlay {
-      opacity: 1;
-      visibility: visible;
-      transition: opacity 300ms ease, visibility 0ms;
-    }
-    .spinner {
-      border: 4px solid var(--accent);
-      border-top-color: transparent;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    /* responsive */
+    @media(max-width:880px){
+      .grid{grid-template-columns:1fr; }
+      .brand h1{font-size:18px;}
     }
 
+    /* ----- [추가] 애니메이션 ----- */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ----- [추가] 결과 영역 애니메이션 ----- */
+    #resultArea > div {
+      /* 결과 카드 전체가 페이드인 */
+      animation: fadeIn 600ms ease forwards;
+    }
+
+    /* 결과 내부 요소 순차적 애니메이션 */
+    .result-score {
+        animation: fadeIn 400ms 100ms ease backwards; /* 100ms 딜레이 */
+    }
+    .result-label {
+        animation: fadeIn 400ms 200ms ease backwards; /* 200ms 딜레이 */
+    }
+    .bar {
+        animation: fadeIn 400ms 300ms ease backwards; /* 300ms 딜레이 */
+    }
+
+    /* 증거 썸네일 순차 등장 */
+    .evidence .thumb {
+        animation: fadeIn 400ms ease forwards;
+        opacity: 0; /* 기본 숨김 */
+    }
+    .evidence .thumb:nth-child(1) { animation-delay: 500ms; }
+    .evidence .thumb:nth-child(2) { animation-delay: 600ms; }
+    .evidence .thumb:nth-child(3) { animation-delay: 700ms; }
+    
   </style>
 </head>
 <body>
@@ -180,212 +152,74 @@
       <div class="brand">
         <div class="logo">FD</div>
         <div>
-          <h1> Deefy — 딥페이크 탐지 (데모)</h1>
-          <p class="lead">AI 기반 영상 진위 판별 시뮬레이션 데모</p>
+          <h1> Deefy — 딥페이크 탐지 사이트</h1>
+          <p class="lead">영상 업로드 후 AI가 진위확률을 판정합니다 (데모용).</p>
         </div>
       </div>
       <div>
-        <button class="btn" id="resetBtn">처음으로</button>
+        <a class="btn" id="aboutBtn">팀 소개</a>
       </div>
     </header>
 
     <div class="grid">
-            <section class="card is-initial" id="main-section">
-        <div class="main-content-wrapper">
-
-                    <div class="content-panel" id="upload-panel">
-            <div class="uploader" id="uploader">
-              <input type="file" id="fileInput" accept="video/*,image/*" />
-              <div>
-                <strong>분석할 파일을 선택하세요</strong>
-                <div class="muted">MP4, MOV, WEBM 등 (이미지 파일도 가능)</div>
-                <button class="btn" id="pickBtn">파일 선택 (시뮬레이션)</button>
-              </div>
-            </div>
-
-            <div id="preview-area">
-              <div class="placeholder">미리보기 영역</div>
-            </div>
-
-            <div class="controls">
-              <button class="btn" id="analyzeBtn" disabled>분석 시작 (결과 시뮬레이션)</button>
-              <div class="ghost" id="status">대기 중</div>
-            </div>
+            <section class="card">
+        <div class="uploader" id="uploader">
+          <input type="file" id="fileInput" accept="video/*,image/*" />
+          <div>
+            <strong>파일을 드래그하거나 클릭하여 업로드하세요</strong>
+            <div class="muted">MP4, MOV, WEBM 등 (최대 100MB 권장)</div>
+            <button class="btn" id="pickBtn">파일 선택</button>
           </div>
-        
-                    <div class="content-panel" id="result-panel">
-            <div class="result-title">AI 분석 결과</div>
-            <div id="resultContent">
-                          </div>
-
-            <div class="controls" style="margin-top: 30px; justify-content: center;">
-              <button class="btn" id="newAnalysisBtn">새 분석 시작</button>
-            </div>
-
-          </div>
-
-                    <div class="loading-overlay" id="loadingOverlay">
-            <div class="spinner"></div>
-            <div style="margin-top: 20px; font-weight: 600;" id="loadingText">영상을 분석 중입니다...</div>
-          </div>
-
         </div>
 
-        <small class="note danger">※ 경고: 현재는 데모 모드입니다. 모든 분석은 클라이언트에서 시뮬레이션된 결과입니다.</small>
+        <div id="preview" style="margin-top:14px;">
+          <div style="color: #cbd5e1;">미리보기가 여기에 표시됩니다</div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="analyzeBtn" disabled>분석 시작</button>
+          <div class="ghost" id="status">대기 중</div>
+        </div>
+
+        <small class="note">※ 현재는 데모 모드입니다. 실제 모델과 연결하려면 서버 주소를 설정하세요.</small>
       </section>
+
+            <aside class="card">
+        <h3>분석 결과</h3>
+        <div id="resultArea" style="margin-top:8px;">
+          <div class="muted">아직 분석이 이루어지지 않았습니다.</div>
+        </div>
+
+        <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff;">
+        <h4>빠른 설명</h4>
+        <p class="muted" style="margin:6px 0;">- 비디오의 얼굴/입 모양·오디오 싱크·합성 아티팩트를 검사합니다.<br>- 데모는 클라이언트 시뮬레이션 결과를 사용합니다.</p>
+      </aside>
     </div>
 
     <footer>
-      <div>© Team Global Creation — 데모 버전</div>
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:center;">
+        <div>© Team Global Creation</div>
+        <div class="muted">배포: GitHub Pages / 실제 분석은 서버 연동 필요</div>
+      </div>
     </footer>
   </div>
 
 <script>
-  const mainSection = document.getElementById('main-section');
+  // ----- 설정: 실제 서버 주소로 바꾸면 fetch 주석 해제하고 사용하세요. -----
+  const ANALYZE_API_URL = ""; // 예: "https://api.yourdomain.com/analyze"
+  // ------------------------------------------------------------
+
   const uploader = document.getElementById('uploader');
   const fileInput = document.getElementById('fileInput');
   const pickBtn = document.getElementById('pickBtn');
-  const previewArea = document.getElementById('preview-area');
+  const preview = document.getElementById('preview');
   const analyzeBtn = document.getElementById('analyzeBtn');
   const status = document.getElementById('status');
-  const resultPanel = document.getElementById('result-panel');
-  const resultContent = document.getElementById('resultContent');
-  const newAnalysisBtn = document.getElementById('newAnalysisBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const loadingOverlay = document.getElementById('loadingOverlay');
-  const loadingText = document.getElementById('loadingText');
+  const resultArea = document.getElementById('resultArea');
 
   let currentFile = null;
 
-  // --- 이벤트 핸들러 ---
-  pickBtn.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-  newAnalysisBtn.addEventListener('click', resetAnalysis);
-  resetBtn.addEventListener('click', resetAnalysis);
-
-  // 파일 처리 (실제 기능은 없지만 데모를 위해 상태만 전환)
-  function handleFile(file) {
-    if (!file) return;
-
-    currentFile = file;
-    analyzeBtn.disabled = false;
-    status.textContent = `파일 준비됨 (${Math.round(file.size/1024)} KB)`;
-    showPreview(file);
-  }
-
-  function showPreview(file) {
-    previewArea.innerHTML = '';
-    // 실제 영상/이미지 대신 시뮬레이션용 플레이스 홀더를 보여줍니다.
-    const type = file.type.startsWith('video') ? '비디오' : file.type.startsWith('image') ? '이미지' : '파일';
-    
-    if (file.type.startsWith('video')) {
-      // 실제 비디오 플레이어 대신 플레이스홀더를 보여줌
-      previewArea.innerHTML = `<div class="placeholder">비디오 파일: ${file.name} (미리보기 시뮬레이션)</div>`;
-    } else if (file.type.startsWith('image')) {
-      previewArea.innerHTML = `<div class="placeholder">이미지 파일: ${file.name} (미리보기 시뮬레이션)</div>`;
-    } else {
-      previewArea.innerHTML = `<div class="placeholder">파일: ${file.name}</div>`;
-    }
-    previewArea.style.minHeight = '200px';
-    uploader.style.display = 'none'; // 파일 선택 후 업로더 숨기기
-  }
-
-  // 분석 시작 (애니메이션 핵심 로직)
-  analyzeBtn.addEventListener('click', async () => {
-    if (!currentFile) return;
-
-    analyzeBtn.disabled = true;
-    mainSection.classList.add('is-loading');
-    loadingText.textContent = '영상을 분석 중입니다... (시뮬레이션)';
-
-    // 1. 분석 로딩 시퀀스
-    await sleep(1000); // 전처리 대기
-    await simulateProgress();
-    
-    mainSection.classList.remove('is-loading');
-    
-    // 2. 결과 시뮬레이션 데이터 생성
-    const fakeProbability = Math.round((0.15 + Math.random()*0.8)*100); // 15%~95%
-    const isFake = fakeProbability > 50;
-    const data = {
-      prediction: fakeProbability/100,
-      label: isFake ? 'fake' : 'real',
-      model_version: 'Demo-v1.0'
-    };
-    
-    // 3. 화면 전환 애니메이션
-    showResult(data);
-    mainSection.classList.add('is-result-show');
-    status.textContent = '분석 완료';
-  });
-
-  function showResult(data) {
-    const pct = Math.round(data.prediction * 100);
-    const label = data.label === 'fake' ? '딥페이크 의심 높음' : '진짜 영상/사진 가능성 높음';
-    const detail = data.label === 'fake' ? '합성 흔적, 얼굴 경계 오류, 입술 움직임 비정상' : '특이한 조작 흔적이나 이상 패턴을 찾지 못함';
-    
-    resultContent.innerHTML = `
-      <div style="text-align: center;">
-        <div class="result-score">${pct}%</div>
-        <div class="result-label ${data.label === 'fake' ? 'label-fake' : 'label-real'}">${label}</div>
-        <div class="bar" aria-hidden><div class="fill" style="width:${pct}%;"></div></div>
-        <div style="margin-top:10px;color:var(--muted);font-size:14px;">
-          이 수치는 딥페이크일 확률을 나타냅니다.
-        </div>
-      </div>
-
-      <div class="evidence">
-        <h4>세부 분석 (${data.model_version})</h4>
-        <p class="muted" style="margin:6px 0;">
-          ${detail}
-        </p>
-        <h4>주요 프레임 증거 (시뮬레이션)</h4>
-        <div class="evidence-list">
-          <div class="thumb">Frame 1</div>
-          <div class="thumb">Frame 2</div>
-          <div class="thumb">Frame 3</div>
-        </div>
-      </div>
-    `;
-  }
-
-  // 초기 상태로 복구
-  function resetAnalysis() {
-    currentFile = null;
-    analyzeBtn.disabled = true;
-    status.textContent = '대기 중';
-    
-    // 애니메이션으로 결과 패널 숨기기 및 업로드 패널 표시
-    mainSection.classList.remove('is-result-show');
-    mainSection.classList.remove('is-loading');
-
-    // 업로더/미리보기 재표시
-    setTimeout(() => {
-      uploader.style.display = 'block';
-      uploader.style.opacity = '1';
-      uploader.style.height = 'auto';
-      uploader.style.padding = '30px';
-      
-      previewArea.innerHTML = `<div class="placeholder">미리보기 영역</div>`;
-      previewArea.style.minHeight = '0';
-      fileInput.value = ''; // 파일 입력 초기화
-      resultContent.innerHTML = '';
-    }, 500); // 애니메이션 시간(500ms)과 맞춤
-  }
-
-  // 간단한 프로그레스 시뮬레이터 (로딩 오버레이 사용)
-  async function simulateProgress(){
-    const steps = [1000, 1200, 800]; // 3초 시뮬레이션
-    const texts = ['비디오 프레임 추출 중...', '딥페이크 모델 분석 중...', '최종 결과 계산 중...'];
-    
-    for (let i = 0; i < steps.length; i++) {
-      loadingText.textContent = texts[i];
-      await sleep(steps[i]);
-    }
-  }
-  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-  
-  // 드래그 & 드롭 (기존 로직 유지)
+  // 드래그 & 드롭
   ['dragenter','dragover'].forEach(evt => {
     uploader.addEventListener(evt, e => {
       e.preventDefault(); e.stopPropagation();
@@ -403,6 +237,159 @@
     handleFile(f);
   });
 
+  pickBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+  function handleFile(file) {
+    if (!file) return;
+    currentFile = file;
+    analyzeBtn.disabled = false;
+    status.textContent = `파일 준비됨 (${Math.round(file.size/1024)} KB)`;
+    showPreview(file);
+  }
+
+  function showPreview(file) {
+    preview.innerHTML = '';
+    if (file.type.startsWith('video')) {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      video.src = url;
+      video.controls = true;
+      video.muted = true;
+      video.playsInline = true;
+      preview.appendChild(video);
+    } else if (file.type.startsWith('image')) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.style.maxWidth = '100%';
+      preview.appendChild(img);
+    } else {
+      preview.textContent = '미리보기 불가한 파일입니다.';
+    }
+  }
+
+  analyzeBtn.addEventListener('click', async () => {
+    if (!currentFile) return;
+    analyzeBtn.disabled = true;
+    status.textContent = '분석 중...';
+    resultArea.innerHTML = '';
+
+    // 실제 서버가 있으면 아래 multipart/form-data로 보내서 결과 받으면 됨.
+    // 예:
+    /*
+    const form = new FormData();
+    form.append('file', currentFile);
+    const resp = await fetch(ANALYZE_API_URL, { method: 'POST', body: form });
+    const data = await resp.json();
+    showResult(data);
+    */
+
+    // -- 데모: 클라이언트 모의 분석 --
+    await sleep(700); // fake preprocessing
+    await simulateProgress();
+
+    // 모의 확률 (랜덤)
+    const fakeProbability = Math.round((0.15 + Math.random()*0.8)*100); // 15~95
+    const isFake = fakeProbability > 50;
+    const data = {
+      prediction: fakeProbability/100,
+      label: isFake ? 'fake' : 'real',
+      evidence: {
+        heatmaps: [],
+        keyframes: []
+      },
+      model_version: 'demo-v0.1'
+    };
+    showResult(data);
+    analyzeBtn.disabled = false;
+    status.textContent = '완료';
+  });
+
+  // [수정된 함수]
+  function showResult(data) {
+    const pct = Math.round(data.prediction * 100);
+    const label = data.label === 'fake' ? '가짜 의심' : '진짜 가능성 높음';
+    
+    // 1. 먼저 HTML 구조를 삽입 (점수는 0%에서 시작, 바 너비는 0%에서 시작)
+    resultArea.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:flex-start;">
+        <div class="result-score">0%</div> 
+        <div class="result-label ${data.label === 'fake' ? 'label-fake' : 'label-real'}">${label}</div>
+        <div class="bar" aria-hidden><div class="fill" style="width:0%;"></div></div>
+        <div style="margin-top:8px;color:var(--muted);font-size:13px;">
+          모델: ${data.model_version} / 신뢰도 수치(참고용)
+        </div>
+        <div class="evidence" id="evidenceArea"></div>
+      </div>
+    `;
+
+    // 2. DOM 요소가 생성된 후, 애니메이션 트리거
+    const scoreEl = resultArea.querySelector('.result-score');
+    const barFillEl = resultArea.querySelector('.bar > .fill');
+
+    // 3. 점수 카운트업 애니메이션 실행
+    if (scoreEl) {
+      animateCountUp(scoreEl, pct, 1200); // 1.2초 동안 카운트업
+    }
+    
+    // 4. 바 채우기 애니메이션 (CSS transition이 처리하도록 딜레이 후 width 설정)
+    setTimeout(() => {
+      if (barFillEl) barFillEl.style.width = `${pct}%`;
+    }, 400); // CSS 딜레이(300ms)보다 약간 늦게 시작
+
+    // 증거(예시 썸네일) 추가
+    const ev = document.getElementById('evidenceArea');
+    if (ev) {
+      for (let i=0;i<3;i++){
+        const d = document.createElement('div'); d.className='thumb';
+        d.textContent = `frame ${i+1}`;
+        ev.appendChild(d);
+      }
+    }
+  }
+
+  // 간단한 프로그레스 시뮬레이터
+  async function simulateProgress(){
+    const steps = [300, 500, 800, 400];
+    for (let v of steps){
+      await sleep(v);
+    }
+  }
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  // [추가된 헬퍼 함수]
+  /**
+   * 숫자 카운트업 애니메이션
+   * @param {HTMLElement} el - 숫자를 표시할 요소
+   * @param {number} toValue - 최종 값
+   * @param {number} duration - 애니메이션 시간 (ms)
+   */
+  function animateCountUp(el, toValue, duration = 1200) {
+    const startTime = performance.now();
+    const startValue = 0; // 항상 0에서 시작
+
+    function step(currentTime) {
+      const elapsedTime = currentTime - startTime;
+      if (elapsedTime >= duration) {
+        el.textContent = `${toValue}%`; // 최종 값 설정
+        return;
+      }
+      
+      const progress = elapsedTime / duration;
+      // Easing (ease-out-cubic): 부드럽게 감속
+      const currentVal = Math.round(startValue + (toValue - startValue) * (1 - Math.pow(1 - progress, 3)));
+      el.textContent = `${currentVal}%`;
+      
+      requestAnimationFrame(step);
+    }
+    
+    requestAnimationFrame(step);
+  }
+
+  // about 버튼
+  document.getElementById('aboutBtn').addEventListener('click', ()=>{
+    alert('Team Global Creation — 딥페이크 탐지 프로토타입입니다.\\n데모는 클라이언트 모의 분석을 사용합니다.');
+  });
 </script>
 </body>
 </html>
