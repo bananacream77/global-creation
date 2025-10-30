@@ -1,495 +1,242 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Deefy — 딥페이크 탐지 사이트 </title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&family=Orbitron:wght@500&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deefy - AI 기반 딥페이크 탐지 시스템</title>
   <style>
-    :root{
-      --bg-1: #f3f7fb;
-      --bg-2: #eef5fb;
-      --card: #ffffff;
-      --muted: #7b8794;
-      --accent-start: #1976ff;
-      --accent-end: #4fb0ff;
-      --glass: rgba(255,255,255,0.7);
-      --shadow: 0 10px 30px rgba(17,24,39,0.06);
-      --radius: 14px;
-    }
+    /* 기본 리셋 & 박스사이징 */
+    * { box-sizing: border-box; }
+    html,body { height: 100%; margin: 0; }
 
-    html,body{height:100%; margin:0; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-    body{
-      background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
-      color: #0b1220;
-      -webkit-font-smoothing:antialiased;
-      padding:40px;
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
-    }
-
-    .container{
-      width:100%;
-      max-width:1180px;
-    }
-
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:28px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-    }
-
-    .logo {
-      width:68px;
-      height:68px;
-      border-radius:16px;
-      background: linear-gradient(135deg,var(--accent-start),var(--accent-end));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      font-weight:800;
-      box-shadow: 0 12px 30px rgba(79,176,255,0.14);
-      font-family: "Orbitron", sans-serif;
-      font-size:20px;
-    }
-
-    .brand-text h1{
-      margin:0;
-      font-size:20px;
-      letter-spacing:0.4px;
-    }
-    .brand-text p{margin:4px 0 0 0; color:var(--muted); font-size:13px;}
-
-    /* header right: small hamburger */
-    .top-actions{
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .hamburger {
-      width:44px;
-      height:44px;
-      border-radius:10px;
-      border:none;
-      background: transparent;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-    }
-    .hamburger .bar{
-      width:20px;height:2px;background:rgba(16,24,39,0.18);
-      position:relative;
-      transition:0.25s;
-      display:block;
-    }
-    .hamburger .bar:before, .hamburger .bar:after{
-      content:'';
-      position:absolute;
-      left:0; right:0;
-      height:2px; background:rgba(16,24,39,0.18);
-      transition:0.25s;
-    }
-    .hamburger .bar:before{top:-6px;}
-    .hamburger .bar:after{bottom:-6px;}
-
-    /* layout */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 420px;
-      gap:26px;
-      align-items:start;
-    }
-
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      padding:22px;
-      box-shadow:var(--shadow);
-    }
-
-    /* uploader */
-    .drop{
-      border:2px dashed rgba(15,23,42,0.06);
-      border-radius:12px;
-      padding:28px;
-      text-align:center;
-      background: linear-gradient(180deg, rgba(251,253,255,0.8), transparent);
-    }
-    .drop h2{margin:0 0 8px 0; font-size:18px;}
-    .drop .sub{color:var(--muted); font-size:13px; margin-bottom:14px;}
-    .pick{
-      display:inline-block;
-      padding:10px 18px;
-      border-radius:12px;
-      background: linear-gradient(180deg,var(--accent-start),var(--accent-end));
-      color:white;
-      font-weight:700;
-      box-shadow:0 8px 22px rgba(25,118,255,0.12);
-      cursor:pointer;
-      border: none;
-    }
-
-    /* --- 🌟 [수정됨] 2번 코드의 미리보기 스타일 적용 --- */
-    #preview{
-      margin-top:18px;
-      width: 100%;
-      max-height: 480px; /* 최대 높이 제한 */
-      border-radius: var(--radius); /* 1번 코드의 테마 변수 사용 */
-      background: #050505; /* 1번 코드의 배경색 사용 */
+    body {
+      font-family: "Noto Sans KR", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background-color: #e8f2fb;
+      color: #222;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--muted);
-      overflow: hidden;
-      min-height: 200px; /* 최소 높이 설정 */
-    }
-    #preview video, 
-    #preview img {
-      width: 100%; /* [핵심] 가로 폭을 꽉 채움 */
-      height: auto; /* [핵심] 비율 유지를 위해 높이는 자동으로 */
-      display: block;
-      max-height: 480px; /* 컨테이너 최대 높이와 맞춤 */
-    }
-    /* --- 🌟 수정 끝 --- */
-
-
-    .controls{
-      margin-top:18px;
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .btn-primary{
-      padding:10px 16px;
-      border-radius:12px;
-      background: linear-gradient(180deg,var(--accent-start),var(--accent-end));
-      color:white; font-weight:700; border:none; cursor:pointer;
-      box-shadow:0 8px 26px rgba(25,118,255,0.12);
-    }
-    .status{
-      background:#f3f6fb;
-      color:var(--muted);
-      padding:10px 12px;
-      border-radius:10px;
-      font-size:13px;
-    }
-    .note{color:var(--muted); margin-top:12px; font-size:13px;}
-
-    /* right panel - result card (1번 코드 스타일 유지) */
-    .result-card h3{margin:0; font-size:20px;}
-    .result-body{margin-top:12px;}
-    .score{
-      font-size:48px;
-      font-weight:800;
-      margin:10px 0;
-    }
-    .score-label{
-      display:inline-block;
-      padding:8px 12px;
-      border-radius:999px;
-      color:white;
-      font-weight:700;
-      font-size:13px;
-    }
-    .fake{background:#ef4444;}
-    .real{background:#10b981;}
-
-    .progress{
-      height:12px;
-      background:#eef6ff;
-      border-radius:999px;
-      overflow:hidden;
-      margin-top:12px;
-    }
-    .progress > i{
-      display:block;
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg,var(--accent-start),var(--accent-end));
-      transition:width 600ms ease;
-    }
-    .evidence{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
-    .thumb{width:110px;height:70px;border-radius:10px;background:#111;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;}
-
-    footer{margin-top:28px;color:var(--muted); font-size:13px; display:flex; justify-content:space-between; align-items:center;}
-
-    /* Menu slide panel (1번 코드 기능 유지) */
-    .side-menu {
-      position:fixed;
-      right:0;
-      top:0;
-      width:360px;
-      height:100%;
-      background: linear-gradient(180deg,#071222 0%, #07202b 100%);
-      color:white;
-      transform: translateX(110%);
-      transition: transform 360ms cubic-bezier(.2,.9,.2,1);
-      z-index:1200;
-      padding:28px;
-      display:flex;
-      flex-direction:column;
-    }
-    .side-menu.open { transform: translateX(0%); }
-    .side-menu .close {
-      align-self:flex-end; cursor:pointer; font-size:22px;
-    }
-    .side-menu .menu-list { margin-top:30px; display:flex;flex-direction:column; gap:22px; }
-    .side-menu .menu-item {
-      display:flex; justify-content:space-between; align-items:center;
-      font-family:"Orbitron",sans-serif;
-      font-weight:700;
-      font-size:20px;
-      text-transform:uppercase;
-      cursor:pointer;
-      padding:8px 0;
-      border-bottom:1px solid rgba(255,255,255,0.03);
-    }
-    .side-menu .submenu { display:none; margin-top:8px; color:#9fb1bd; font-weight:600; padding-left:6px; font-size:14px; }
-    .side-menu .submenu.show { display:block; }
-
-    /* responsive */
-    @media (max-width:980px){
-      .grid { grid-template-columns: 1fr; }
-      .side-menu { width:100%; transform: translateX(110%); }
+      min-height: 100vh;
+      position: relative;
     }
 
+    /* 우측 상단 로그인 버튼 */
+    .login-top-btn {
+      position: absolute;
+      top: 22px;
+      right: 28px;
+      padding: 10px 22px;
+      border: 1.8px solid #2563eb;
+      background-color: transparent;
+      color: #2563eb;
+      font-size: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .login-top-btn:hover { background-color: #2563eb; color: #fff; }
+
+    /* 중앙 콘텐츠 */
+    .main {
+      text-align: center;
+      padding: 20px 30px;
+    }
+    .main-title {
+      font-size: 68px;
+      color: #2563eb;
+      font-weight: 800;
+      margin: 0 0 8px 0;
+      line-height: 1;
+    }
+    .sub-title {
+      font-size: 18px;
+      color: #444;
+      margin: 0 0 36px 0;
+    }
+
+    .btn-group { display:flex; gap: 16px; justify-content:center; align-items:center; flex-wrap:wrap; }
+
+    .btn-primary {
+      padding: 12px 28px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn-primary:hover { background: #1e4ed8; }
+
+    .btn-outline {
+      padding: 12px 28px;
+      border: 1.8px solid #2563eb;
+      color: #2563eb;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn-outline:hover { background: #dbeafe; }
+
+    /* 모달 (overlay) */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;              /* 초기엔 숨김 */
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.45);
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .modal.show { display: flex; } /* 보여줄 때 클래스 추가/제거 */
+
+    .modal-content {
+      width: 420px;
+      max-width: 100%;
+      background: #fff;
+      border-radius: 14px;
+      padding: 26px;
+      box-shadow: 0 18px 50px rgba(3, 10, 25, 0.2);
+      text-align: center;
+      animation: pop 180ms ease;
+    }
+    @keyframes pop {
+      from { transform: translateY(8px) scale(.98); opacity: 0; }
+      to   { transform: translateY(0)    scale(1);    opacity: 1; }
+    }
+
+    .modal-title { font-size: 22px; margin: 4px 0 18px 0; font-weight:700; color:#111; }
+    .form-field { width: 100%; margin-bottom: 12px; }
+
+    /* 입력 스타일 - box-sizing 포함이 핵심 */
+    .modal-content input[type="email"],
+    .modal-content input[type="password"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.2px solid #d1d5db;
+      font-size: 15px;
+      outline: none;
+      background: #fff;
+    }
+    .modal-content input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 6px 18px rgba(37,99,235,0.08);
+    }
+
+    .modal-actions { margin-top: 14px; display:flex; gap:10px; flex-direction:column; }
+    .modal-actions button {
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+    }
+    .login-btn { background: linear-gradient(180deg,#2563eb,#1e4ed8); color:#fff; }
+    .close-btn { background: #f3f4f6; color:#111; }
+
+    /* 작은 화면 대응 */
+    @media (max-width:480px){
+      .main-title { font-size: 44px; }
+      .modal-content { padding:18px; width: 92%; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="brand">
-        <div class="logo">FD</div>
-        <div class="brand-text">
-          <h1>Deefy — 딥페이크 탐지</h1>
-          <p>영상 업로드 후 AI가 진위확률을 판정합니다.</p>
-        </div>
-      </div>
 
-      <div class="top-actions">
-        <button class="hamburger" id="openMenu" aria-label="메뉴 열기">
-          <span class="bar"></span>
-        </button>
-      </div>
-    </header>
+  <!-- 오른쪽 상단 로그인 버튼 -->
+  <button class="login-top-btn" id="openLoginBtn">로그인</button>
 
-    <main class="grid">
-      <section class="card">
-        <div class="drop" id="dropZone">
-          <h2>파일을 드래그하거나 클릭하여 업로드하세요</h2>
-          <div class="sub">MP4, MOV, WEBM 등 (최대 100MB 권장)</div>
-          <button class="pick" id="pickBtn">파일 선택</button>
-          <input type="file" id="fileInput" accept="video/*,image/*" style="display:none;">
-        </div>
+  <!-- 중앙 메인 -->
+  <div class="main" role="main">
+    <h1 class="main-title">Deefy</h1>
+    <p class="sub-title">AI 기반 딥페이크 탐지 시스템</p>
 
-        <div id="preview" aria-live="polite">미리보기가 여기에 표시됩니다</div>
-
-        <div class="controls">
-          <button class="btn-primary" id="analyzeBtn" disabled>분석 시작</button>
-          <div class="status" id="status">대기 중</div>
-        </div>
-
-      </section>
-
-      <aside class="card result-card">
-        <h3>분석 결과</h3>
-        <div class="result-body" id="resultArea">
-          <div style="color:var(--muted)">아직 분석이 이루어지지 않았습니다.</div>
-        </div>
-      </aside>
-    </main>
-
-    <footer>
-      <div>© Team 06</div>
-    </footer>
+    <div class="btn-group">
+      <button class="btn-primary" id="startBtn">Get Started →</button>
+      <button class="btn-outline" id="proBtn">업무용 Deefy Pro 사용해보기 →</button>
+    </div>
   </div>
 
-  <div class="side-menu" id="sideMenu" aria-hidden="true">
-    <div class="close" id="closeSide">✕</div>
-    <div style="margin-top:6px; font-weight:700; font-size:14px; color:#9ed1ff;">Deefy</div>
-    <div style="font-size:20px;font-weight:800;margin-top:6px;">Category</div>
+  <!-- 로그인 모달 -->
+  <div class="modal" id="loginModal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-content" role="document">
+      <div class="modal-title">로그인</div>
 
-    <div class="menu-list">
-      <div class="menu-item" data-target="m-cat">INTRODUCTION <span>⌄</span></div>
-      <div class="submenu" id="m-cat">
-        <div>소개 (About)</div>
-        <div>인공지능 모델 (Model)</div>
-        <div>팀원 (Team)</div>
+      <div class="form-field">
+        <input type="email" id="email" placeholder="이메일 입력" autocomplete="username" />
+      </div>
+      <div class="form-field">
+        <input type="password" id="password" placeholder="비밀번호 입력" autocomplete="current-password" />
       </div>
 
-      <div class="menu-item" data-target="m-acc">MY ACCOUNT <span>⌄</span></div>
-      <div class="submenu" id="m-acc">
-        <div>로그인</div>
-        <div>프로필</div>
-      </div>
-
-      <div class="menu-item" data-target="m-PRO PRICE"> DEEFY PRICE <span>⌄</span></div>
-      <div class="submenu" id="m-PRO PRICE">
-        <div>모델별 가격</div>
-        <div>설정</div>
-      </div>
-
-      <div class="menu-item" data-target="m-help">HELP <span>⌄</span></div>
-      <div class="submenu" id="m-help">
-        <div>FAQ</div>
-        <div>문의하기</div>
+      <div class="modal-actions">
+        <button class="login-btn" id="modalLoginBtn">로그인</button>
+        <button class="close-btn" id="closeLoginBtn">닫기</button>
       </div>
     </div>
   </div>
 
-<script>
-  // 간단 업로드/미리보기/데모 분석 로직
-  const fileInput = document.getElementById('fileInput');
-  const pickBtn = document.getElementById('pickBtn');
-  const dropZone = document.getElementById('dropZone');
-  const preview = document.getElementById('preview');
-  const analyzeBtn = document.getElementById('analyzeBtn');
-  const status = document.getElementById('status');
-  const resultArea = document.getElementById('resultArea');
+  <script>
+    // 요소
+    const openLoginBtn = document.getElementById('openLoginBtn');
+    const loginModal   = document.getElementById('loginModal');
+    const closeLoginBtn = document.getElementById('closeLoginBtn');
+    const modalLoginBtn = document.getElementById('modalLoginBtn');
+    const startBtn = document.getElementById('startBtn');
 
-  let currentFile = null;
-
-  pickBtn.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-
-  // drag & drop
-  ['dragenter','dragover'].forEach(ev => {
-    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.style.boxShadow = '0 12px 30px rgba(25,118,255,0.06)'; });
-  });
-  ['dragleave','drop'].forEach(ev => {
-    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.style.boxShadow = 'none'; });
-  });
-  dropZone.addEventListener('drop', (e) => {
-    const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    handleFile(f);
-  });
-
-  function handleFile(file){
-    if(!file) return;
-    currentFile = file;
-    analyzeBtn.disabled = false;
-    // --- 🌟 [수정됨] 템플릿 리터럴 문법 오류 수정 (앞에 ` 추가) ---
-    status.textContent = `파일 준비됨 · ${Math.round(file.size/1024)} KB`;
-
-    preview.innerHTML = '';
-    if (file.type.startsWith('video')){
-      const url = URL.createObjectURL(file);
-      const v = document.createElement('video');
-      v.src = url; v.controls = true; v.muted = true; v.playsInline = true;
-      // --- 🌟 [수정됨] 2번 코드처럼 고정 높이 제거 ---
-      // v.style.height = '48px'; 
-      preview.appendChild(v);
-    } else if (file.type.startsWith('image')){
-      const url = URL.createObjectURL(file);
-      const img = document.createElement('img');
-      img.src = url;
-      // --- 🌟 [수정됨] 2번 코드처럼 고정 높이 제거 ---
-      // img.style.height = '48px';
-      preview.appendChild(img);
-    } else {
-      preview.textContent = '미리보기 불가한 파일입니다';
-    }
-  }
-
-  // 1번 코드의 데모 분석 로직 유지
-  analyzeBtn.addEventListener('click', async () => {
-    if(!currentFile) return;
-    analyzeBtn.disabled = true;
-    status.textContent = '분석 중...';
-    resultArea.innerHTML = '';
-
-    // 데모: 모의 처리
-    await sleep(600);
-    await simulateProgress();
-
-    const fakeProbability = Math.round((0.08 + Math.random()*0.9)*100); // 8~98
-    const isFake = fakeProbability > 50;
-    const data = {
-      prediction: fakeProbability/100,
-      label: isFake ? 'fake' : 'real',
-      model_version: 'demo-v0.2'
-    };
-    showResult(data);
-    analyzeBtn.disabled = false;
-    status.textContent = '완료';
-  });
-
-  // 1번 코드의 결과 표시 로직 유지
-  function showResult(data){
-    const pct = Math.round(data.prediction * 100);
-    const labelText = data.label === 'fake' ? '가짜 의심' : '진짜일 가능성 높음';
-    resultArea.innerHTML = `
-      <div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex;flex-direction:column;">
-            <div style="font-size:13px;color:var(--muted)">모델</div>
-            <div style="font-weight:700">${data.model_version}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="score">${pct}%</div>
-            <div class="score-label ${data.label === 'fake' ? 'fake' : 'real'}">${labelText}</div>
-          </div>
-        </div>
-        <div class="progress" aria-hidden><i style="width:${pct}%"></i></div>
-        <div style="margin-top:12px;color:var(--muted);font-size:13px;">신뢰도 수치(참고용)</div>
-        <div class="evidence" id="evidence">
-          <div class="thumb">F1</div>
-          <div class="thumb">F2</div>
-          <div class="thumb">F3</div>
-        </div>
-      </div>
-    `;
-  }
-
-  async function simulateProgress(){
-    const delays = [300, 500, 700, 300];
-    for (let d of delays) await sleep(d);
-  }
-  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-
-  // 1번 코드의 side menu controls 유지
-  const openMenu = document.getElementById('openMenu');
-  const sideMenu = document.getElementById('sideMenu');
-  const closeSide = document.getElementById('closeSide');
-
-  openMenu.addEventListener('click', ()=> {
-    sideMenu.classList.add('open');
-    sideMenu.setAttribute('aria-hidden','false');
-  });
-  closeSide.addEventListener('click', ()=>{
-    sideMenu.classList.remove('open');
-    sideMenu.setAttribute('aria-hidden','true');
-  });
-
-  // submenu toggle
-  document.querySelectorAll('.menu-item').forEach(mi=>{
-    mi.addEventListener('click', ()=>{
-      const id = mi.dataset.target;
-      const el = document.getElementById(id);
-      if(!el) return;
-      el.classList.toggle('show');
+    // 모달 열기
+    openLoginBtn.addEventListener('click', () => {
+      loginModal.classList.add('show');
+      loginModal.setAttribute('aria-hidden','false');
+      // 포커스 접근성: 이메일 필드에 포커스
+      setTimeout(()=> document.getElementById('email').focus(), 80);
     });
-  });
 
-  // close menu when clicking outside (for smaller screens)
-  window.addEventListener('click', (e)=>{
-    if(sideMenu.classList.contains('open') && !sideMenu.contains(e.target) && !openMenu.contains(e.target)){
-      sideMenu.classList.remove('open');
-    }
-  });
-</script>
+    // 모달 닫기 (닫기 버튼)
+    closeLoginBtn.addEventListener('click', () => {
+      loginModal.classList.remove('show');
+      loginModal.setAttribute('aria-hidden','true');
+    });
+
+    // 모달 닫기 (오버레이 클릭)
+    loginModal.addEventListener('click', (e) => {
+      if (e.target === loginModal) {
+        loginModal.classList.remove('show');
+        loginModal.setAttribute('aria-hidden','true');
+      }
+    });
+
+    // 데모: 로그인 버튼 클릭 처리 (실서버 연동 시 교체)
+    modalLoginBtn.addEventListener('click', () => {
+      const email = document.getElementById('email').value.trim();
+      const pwd   = document.getElementById('password').value;
+      if (!email || !pwd) {
+        alert('이메일과 비밀번호를 입력하세요.');
+        return;
+      }
+      // 여기서 실제 인증 호출 가능 (fetch)
+      alert('데모 로그인 성공: ' + email);
+      // 모달 닫기
+      loginModal.classList.remove('show');
+      loginModal.setAttribute('aria-hidden','true');
+    });
+
+    // Get Started 버튼: analyze.html로 이동
+    startBtn.addEventListener('click', () => {
+      // analyze.html 파일이 같은 경로에 존재해야 합니다.
+      window.location.href = 'analyze.html';
+    });
+
+    // 키보드 ESC로 모달 닫기
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && loginModal.classList.contains('show')) {
+        loginModal.classList.remove('show');
+        loginModal.setAttribute('aria-hidden','true');
+      }
+    });
+  </script>
 </body>
 </html>
