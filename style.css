@@ -114,23 +114,26 @@ p.lead {
 }
 
 /* 변경 후 (연한 회색) */
-.preview {
-  width: 100%;
-  max-height: 420px;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #e9ecef; /* 배경색을 연한 회색으로 변경 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6c757d; /* 텍스트가 잘 보이도록 어두운 색으로 변경 */
+/* preview 영역 스타일 — index.html의 id="preview" 요소에 적용됩니다 */
+#preview {
+  width: 100%;
+  max-height: 420px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #e9ecef; /* 연한 회색 배경 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d; /* 미리보기 안내 텍스트 색상 */
 }
 
-.preview video,
-.preview img {
+/* 비디오 / 이미지에 대한 안전한 최대 크기 설정 */
+#preview video,
+#preview img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  display: block;
 }
 
 /* 버튼 및 상태 */
