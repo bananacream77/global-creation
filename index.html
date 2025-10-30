@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title> Deefy — 딥페이크 탐지</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
+  <title>Deefy — 딥페이크 탐지</title>
 
   <style>
     body {
       margin: 0;
       background-color: #e8f4fc;
       font-family: 'Noto Sans KR', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       height: 100vh;
+      display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
 
     .nav {
@@ -25,21 +24,21 @@
       right: 30px;
     }
 
-    .logo-box {
+    .intro-container {
       text-align: center;
-      margin-bottom: 20px;
     }
 
     .logo {
-      font-size: 3rem;
+      font-size: 3.5rem;
       font-weight: 700;
       color: #2563eb;
+      margin-bottom: 10px;
     }
 
     .tagline {
       font-size: 1.2rem;
       color: #333;
-      margin-top: 10px;
+      margin-bottom: 40px;
     }
 
     button {
@@ -78,10 +77,8 @@
   </div>
 
   <div class="intro-container">
-    <div class="logo-box">
-      <div class="logo">Deefy</div>
-      <div class="tagline">AI 기반 딥페이크 탐지 시스템</div>
-    </div>
+    <div class="logo">Deefy</div>
+    <div class="tagline">AI 기반 딥페이크 탐지 시스템</div>
     <button class="btn-primary" id="startBtn">Get Started →</button>
     <button class="btn-sub" onclick="alert('Pro 버전은 추후 공개 예정입니다.')">
       업무용 Deefy Pro 사용해보기 →
