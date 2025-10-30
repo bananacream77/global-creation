@@ -3,108 +3,296 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Deefy — 딥페이크 탐지</title>
+  <title>FakeDetect — 데모</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --accent: #0b76ef;
+      --danger: #ef4444;
+      --muted: #6b7280;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#f6f8fb 0%, #eef3fb 100%);
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:48px 20px;
+      color:#0f172a;
+    }
+    .wrap{
+      width:100%;
+      max-width:980px;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:28px;
+    }
+    .brand{display:flex;align-items:center;gap:12px;}
+    .logo{
+      width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7cc3ff);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;
+      box-shadow:0 6px 18px rgba(11,118,239,0.18);
+    }
+    h1{font-size:20px;margin:0;}
+    p.lead{margin:0;color:var(--muted);font-size:13px;}
 
-  <!-- 스타일 연결 -->
-  <link rel="stylesheet" href="style.css" />
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:22px;}
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      padding:18px;
+      box-shadow:0 6px 20px rgba(15,23,42,0.06);
+    }
+
+    /* upload area */
+    .uploader{
+      border:2px dashed rgba(15,23,42,0.06);
+      border-radius:10px;padding:16px; text-align:center;
+      background:linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+    }
+    .uploader.dragover{border-color:var(--accent);box-shadow:0 10px 30px rgba(11,118,239,0.06);}
+    .uploader input{display:none;}
+    .btn{
+      display:inline-block;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;font-weight:600;
+      cursor:pointer;text-decoration:none;margin-top:10px;
+    }
+    .muted{color:var(--muted);font-size:13px;margin-top:6px;}
+
+    /* preview */
+    #preview{width:100%;max-height:420px;border-radius:10px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
+    #preview video{width:100%;height:auto;display:block;}
+
+    .controls{display:flex;gap:8px;margin-top:12px;align-items:center;}
+    .ghost{background:#f3f4f6;padding:8px 12px;border-radius:8px;color:var(--muted);font-size:13px;}
+
+    /* result */
+    .result-score{font-size:34px;font-weight:700;margin:8px 0;}
+    .result-label{font-weight:700;padding:6px 10px;border-radius:999px;font-size:13px;color:white;display:inline-block;}
+    .label-fake{background:var(--danger);}
+    .label-real{background:#10b981;}
+
+    .bar{
+      height:12px;border-radius:999px;background:#e6eefc;margin-top:10px;overflow:hidden;
+    }
+    .bar > .fill{height:100%;background:linear-gradient(90deg,var(--accent),#7cc3ff);width:0%;transition:width 550ms ease;}
+
+    .evidence{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+    .thumb{width:96px;height:64px;border-radius:8px;overflow:hidden;background:#111;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;}
+
+    footer{margin-top:18px;font-size:13px;color:var(--muted);}
+    small.note{color:var(--muted);display:block;margin-top:10px;font-size:13px;}
+
+    /* responsive */
+    @media(max-width:880px){
+      .grid{grid-template-columns:1fr; }
+      .brand h1{font-size:18px;}
+    }
+  </style>
 </head>
-<body class="analyze">
-  <header>
-    <h1>Deefy — 딥페이크 탐지</h1>
-    <p>영상 업로드 후 AI가 진위 여부를 판정합니다.</p>
-  </header>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">FD</div>
+        <div>
+          <h1>FakeDetect — 딥페이크 탐지 데모</h1>
+          <p class="lead">영상 업로드 후 AI가 진위확률을 판정합니다 (데모용).</p>
+        </div>
+      </div>
+      <div>
+        <a class="btn" id="aboutBtn">팀 소개</a>
+      </div>
+    </header>
 
-  <main class="analyze-box">
-    <!-- 업로드 구역 -->
-    <section class="upload-box">
-      <h2>파일 업로드</h2>
-      <input type="file" id="fileInput" accept="video/*,image/*" />
-      <div class="preview" id="preview">미리보기가 여기에 표시됩니다</div>
-      <button class="btn-primary" id="analyzeBtn" disabled>분석 시작</button>
-      <p class="status" id="status">대기 중</p>
-    </section>
+    <div class="grid">
+      <!-- main -->
+      <section class="card">
+        <div class="uploader" id="uploader">
+          <input type="file" id="fileInput" accept="video/*,image/*" />
+          <div>
+            <strong>파일을 드래그하거나 클릭하여 업로드하세요</strong>
+            <div class="muted">MP4, MOV, WEBM 등 (최대 100MB 권장)</div>
+            <button class="btn" id="pickBtn">파일 선택</button>
+          </div>
+        </div>
 
-    <!-- 결과 구역 -->
-    <section class="result-box">
-      <h2>분석 결과</h2>
-      <div id="resultArea" style="color:#64748b;">아직 분석이 이루어지지 않았습니다.</div>
-    </section>
-  </main>
+        <div id="preview" style="margin-top:14px;">
+          <div style="color: #cbd5e1;">미리보기가 여기에 표시됩니다</div>
+        </div>
 
-  <footer>
-    © Team Global Creation — Deefy AI 딥페이크 탐지 시스템
-  </footer>
+        <div class="controls">
+          <button class="btn" id="analyzeBtn" disabled>분석 시작</button>
+          <div class="ghost" id="status">대기 중</div>
+        </div>
 
-  <script>
-    // 파일 입력 및 미리보기
-    const fileInput = document.getElementById('fileInput');
-    const preview = document.getElementById('preview');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const status = document.getElementById('status');
-    const resultArea = document.getElementById('resultArea');
+        <small class="note">※ 현재는 데모 모드입니다. 실제 모델과 연결하려면 서버 주소를 설정하세요.</small>
+      </section>
 
-    let currentFile = null;
+      <!-- right panel -->
+      <aside class="card">
+        <h3>분석 결과</h3>
+        <div id="resultArea" style="margin-top:8px;">
+          <div class="muted">아직 분석이 이루어지지 않았습니다.</div>
+        </div>
 
-    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+        <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff;">
+        <h4>빠른 설명</h4>
+        <p class="muted" style="margin:6px 0;">- 비디오의 얼굴/입 모양·오디오 싱크·합성 아티팩트를 검사합니다.<br>- 데모는 클라이언트 시뮬레이션 결과를 사용합니다.</p>
+      </aside>
+    </div>
 
-    function handleFile(file) {
-      if (!file) return;
-      currentFile = file;
-      analyzeBtn.disabled = false;
-      status.textContent = `파일 준비됨 · ${Math.round(file.size / 1024)} KB`;
+    <footer>
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:center;">
+        <div>© Team Global Creation</div>
+        <div class="muted">배포: GitHub Pages / 실제 분석은 서버 연동 필요</div>
+      </div>
+    </footer>
+  </div>
 
-      preview.innerHTML = '';
-      const url = URL.createObjectURL(file);
+<script>
+  // ----- 설정: 실제 서버 주소로 바꾸면 fetch 주석 해제하고 사용하세요. -----
+  const ANALYZE_API_URL = ""; // 예: "https://api.yourdomain.com/analyze"
+  // ------------------------------------------------------------
 
-      if (file.type.startsWith('video')) {
-        const v = document.createElement('video');
-        v.src = url;
-        v.controls = true;
-        v.muted = true;
-        v.playsInline = true;
-        preview.appendChild(v);
-      } else if (file.type.startsWith('image')) {
-        const img = document.createElement('img');
-        img.src = url;
-        preview.appendChild(img);
-      } else {
-        preview.textContent = '미리보기 불가한 파일입니다';
-      }
-    }
+  const uploader = document.getElementById('uploader');
+  const fileInput = document.getElementById('fileInput');
+  const pickBtn = document.getElementById('pickBtn');
+  const preview = document.getElementById('preview');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const status = document.getElementById('status');
+  const resultArea = document.getElementById('resultArea');
 
-    analyzeBtn.addEventListener('click', async () => {
-      if (!currentFile) return;
-      analyzeBtn.disabled = true;
-      status.textContent = '분석 중...';
-      resultArea.textContent = '';
+  let currentFile = null;
 
-      await sleep(800); // 모의 분석 대기
-
-      // 가짜 확률 임의로 생성 (데모용)
-      const fakeProbability = Math.round((0.1 + Math.random() * 0.8) * 100);
-      const isFake = fakeProbability > 50;
-
-      showResult({
-        prediction: fakeProbability / 100,
-        label: isFake ? 'fake' : 'real',
-      });
-
-      analyzeBtn.disabled = false;
-      status.textContent = '완료';
+  // 드래그 & 드롭
+  ['dragenter','dragover'].forEach(evt => {
+    uploader.addEventListener(evt, e => {
+      e.preventDefault(); e.stopPropagation();
+      uploader.classList.add('dragover');
     });
+  });
+  ['dragleave','drop'].forEach(evt => {
+    uploader.addEventListener(evt, e => {
+      e.preventDefault(); e.stopPropagation();
+      uploader.classList.remove('dragover');
+    });
+  });
+  uploader.addEventListener('drop', e => {
+    const f = e.dataTransfer.files[0];
+    handleFile(f);
+  });
 
-    function showResult(data) {
-      const pct = Math.round(data.prediction * 100);
-      const labelText = data.label === 'fake' ? '⚠️ 가짜일 가능성 높음' : '✅ 진짜일 가능성 높음';
-      resultArea.innerHTML = `
-        <div style="font-size:1.5rem; font-weight:700;">${pct}%</div>
-        <div style="margin-top:6px;">${labelText}</div>
-      `;
-    }
+  pickBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-    function sleep(ms) {
-      return new Promise(res => setTimeout(res, ms));
+  function handleFile(file) {
+    if (!file) return;
+    currentFile = file;
+    analyzeBtn.disabled = false;
+    status.textContent = `파일 준비됨 (${Math.round(file.size/1024)} KB)`;
+    showPreview(file);
+  }
+
+  function showPreview(file) {
+    preview.innerHTML = '';
+    if (file.type.startsWith('video')) {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      video.src = url;
+      video.controls = true;
+      video.muted = true;
+      video.playsInline = true;
+      preview.appendChild(video);
+    } else if (file.type.startsWith('image')) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.style.maxWidth = '100%';
+      preview.appendChild(img);
+    } else {
+      preview.textContent = '미리보기 불가한 파일입니다.';
     }
-  </script>
+  }
+
+  analyzeBtn.addEventListener('click', async () => {
+    if (!currentFile) return;
+    analyzeBtn.disabled = true;
+    status.textContent = '분석 중...';
+    resultArea.innerHTML = '';
+
+    // 실제 서버가 있으면 아래 multipart/form-data로 보내서 결과 받으면 됨.
+    // 예:
+    /*
+    const form = new FormData();
+    form.append('file', currentFile);
+    const resp = await fetch(ANALYZE_API_URL, { method: 'POST', body: form });
+    const data = await resp.json();
+    showResult(data);
+    */
+
+    // -- 데모: 클라이언트 모의 분석 --
+    await sleep(700); // fake preprocessing
+    await simulateProgress();
+
+    // 모의 확률 (랜덤)
+    const fakeProbability = Math.round((0.15 + Math.random()*0.8)*100); // 15~95
+    const isFake = fakeProbability > 50;
+    const data = {
+      prediction: fakeProbability/100,
+      label: isFake ? 'fake' : 'real',
+      evidence: {
+        heatmaps: [],
+        keyframes: []
+      },
+      model_version: 'demo-v0.1'
+    };
+    showResult(data);
+    analyzeBtn.disabled = false;
+    status.textContent = '완료';
+  });
+
+  function showResult(data) {
+    const pct = Math.round(data.prediction * 100);
+    const label = data.label === 'fake' ? '가짜 의심' : '진짜 가능성 높음';
+    resultArea.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:flex-start;">
+        <div class="result-score">${pct}%</div>
+        <div class="result-label ${data.label === 'fake' ? 'label-fake' : 'label-real'}">${label}</div>
+        <div class="bar" aria-hidden><div class="fill" style="width:${pct}%;"></div></div>
+        <div style="margin-top:8px;color:var(--muted);font-size:13px;">
+          모델: ${data.model_version} / 신뢰도 수치(참고용)
+        </div>
+        <div class="evidence" id="evidenceArea"></div>
+      </div>
+    `;
+
+    // 증거(예시 썸네일) 추가
+    const ev = document.getElementById('evidenceArea');
+    for (let i=0;i<3;i++){
+      const d = document.createElement('div'); d.className='thumb';
+      d.textContent = `frame ${i+1}`;
+      ev.appendChild(d);
+    }
+  }
+
+  // 간단한 프로그레스 시뮬레이터
+  async function simulateProgress(){
+    const steps = [300, 500, 800, 400];
+    for (let v of steps){
+      await sleep(v);
+    }
+  }
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  // about 버튼
+  document.getElementById('aboutBtn').addEventListener('click', ()=>{
+    alert('Team Global Creation — 딥페이크 탐지 프로토타입입니다.\\n데모는 클라이언트 모의 분석을 사용합니다.');
+  });
+</script>
 </body>
 </html>
