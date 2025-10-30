@@ -2,240 +2,100 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Deefy - AI 기반 딥페이크 탐지 시스템</title>
-  <style>
-    /* 기본 리셋 & 박스사이징 */
-    * { box-sizing: border-box; }
-    html,body { height: 100%; margin: 0; }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deefy — 딥페이크 탐지</title>
 
+  <style>
+    /* 전체 페이지 기본 설정 */
     body {
-      font-family: "Noto Sans KR", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background-color: #e8f2fb;
-      color: #222;
+      margin: 0;
+      background-color: #e8f4fc;
+      font-family: 'Noto Sans KR', sans-serif;
+      height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       position: relative;
     }
 
-    /* 우측 상단 로그인 버튼 */
-    .login-top-btn {
+    /* 오른쪽 상단 로그인 버튼 */
+    .nav {
       position: absolute;
-      top: 22px;
-      right: 28px;
-      padding: 10px 22px;
-      border: 1.8px solid #2563eb;
-      background-color: transparent;
-      color: #2563eb;
-      font-size: 15px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.22s ease;
+      top: 20px;
+      right: 30px;
     }
-    .login-top-btn:hover { background-color: #2563eb; color: #fff; }
 
-    /* 중앙 콘텐츠 */
-    .main {
+    /* 가운데 로고 및 소개 문구 */
+    .intro-container {
       text-align: center;
-      padding: 20px 30px;
-    }
-    .main-title {
-      font-size: 68px;
-      color: #2563eb;
-      font-weight: 800;
-      margin: 0 0 8px 0;
-      line-height: 1;
-    }
-    .sub-title {
-      font-size: 18px;
-      color: #444;
-      margin: 0 0 36px 0;
     }
 
-    .btn-group { display:flex; gap: 16px; justify-content:center; align-items:center; flex-wrap:wrap; }
+    .logo {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #2563eb;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      color: #333;
+      margin-bottom: 40px;
+    }
+
+    /* 버튼 스타일 */
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 10px;
+    }
 
     .btn-primary {
-      padding: 12px 28px;
       background-color: #2563eb;
       color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 16px;
     }
-    .btn-primary:hover { background: #1e4ed8; }
 
-    .btn-outline {
-      padding: 12px 28px;
-      border: 1.8px solid #2563eb;
+    .btn-primary:hover {
+      background-color: #1e4ed8;
+    }
+
+    .btn-sub {
+      background-color: white;
+      border: 1.5px solid #2563eb;
       color: #2563eb;
-      background: transparent;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .btn-outline:hover { background: #dbeafe; }
-
-    /* 모달 (overlay) */
-    .modal {
-      position: fixed;
-      inset: 0;
-      display: none;              /* 초기엔 숨김 */
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,0.45);
-      z-index: 2000;
-      padding: 20px;
     }
 
-    .modal.show { display: flex; } /* 보여줄 때 클래스 추가/제거 */
-
-    .modal-content {
-      width: 420px;
-      max-width: 100%;
-      background: #fff;
-      border-radius: 14px;
-      padding: 26px;
-      box-shadow: 0 18px 50px rgba(3, 10, 25, 0.2);
-      text-align: center;
-      animation: pop 180ms ease;
-    }
-    @keyframes pop {
-      from { transform: translateY(8px) scale(.98); opacity: 0; }
-      to   { transform: translateY(0)    scale(1);    opacity: 1; }
-    }
-
-    .modal-title { font-size: 22px; margin: 4px 0 18px 0; font-weight:700; color:#111; }
-    .form-field { width: 100%; margin-bottom: 12px; }
-
-    /* 입력 스타일 - box-sizing 포함이 핵심 */
-    .modal-content input[type="email"],
-    .modal-content input[type="password"] {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1.2px solid #d1d5db;
-      font-size: 15px;
-      outline: none;
-      background: #fff;
-    }
-    .modal-content input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 6px 18px rgba(37,99,235,0.08);
-    }
-
-    .modal-actions { margin-top: 14px; display:flex; gap:10px; flex-direction:column; }
-    .modal-actions button {
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-    }
-    .login-btn { background: linear-gradient(180deg,#2563eb,#1e4ed8); color:#fff; }
-    .close-btn { background: #f3f4f6; color:#111; }
-
-    /* 작은 화면 대응 */
-    @media (max-width:480px){
-      .main-title { font-size: 44px; }
-      .modal-content { padding:18px; width: 92%; }
+    .btn-sub:hover {
+      background-color: #eff6ff;
     }
   </style>
 </head>
+
 <body>
-
-  <!-- 오른쪽 상단 로그인 버튼 -->
-  <button class="login-top-btn" id="openLoginBtn">로그인</button>
-
-  <!-- 중앙 메인 -->
-  <div class="main" role="main">
-    <h1 class="main-title">Deefy</h1>
-    <p class="sub-title">AI 기반 딥페이크 탐지 시스템</p>
-
-    <div class="btn-group">
-      <button class="btn-primary" id="startBtn">Get Started →</button>
-      <button class="btn-outline" id="proBtn">업무용 Deefy Pro 사용해보기 →</button>
-    </div>
+  <!-- 로그인 버튼 -->
+  <div class="nav">
+    <button class="btn-sub" onclick="alert('로그인 기능은 아직 준비 중입니다.')">로그인</button>
   </div>
 
-  <!-- 로그인 모달 -->
-  <div class="modal" id="loginModal" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-content" role="document">
-      <div class="modal-title">로그인</div>
-
-      <div class="form-field">
-        <input type="email" id="email" placeholder="이메일 입력" autocomplete="username" />
-      </div>
-      <div class="form-field">
-        <input type="password" id="password" placeholder="비밀번호 입력" autocomplete="current-password" />
-      </div>
-
-      <div class="modal-actions">
-        <button class="login-btn" id="modalLoginBtn">로그인</button>
-        <button class="close-btn" id="closeLoginBtn">닫기</button>
-      </div>
-    </div>
+  <!-- 메인 콘텐츠 -->
+  <div class="intro-container">
+    <div class="logo">Deefy</div>
+    <div class="tagline">AI 기반 딥페이크 탐지 시스템</div>
+    <button class="btn-primary" id="startBtn">Get Started →</button>
+    <button class="btn-sub" onclick="alert('Pro 버전은 추후 공개 예정입니다.')">
+      업무용 Deefy Pro 사용해보기 →
+    </button>
   </div>
 
+  <!-- 클릭 이벤트 -->
   <script>
-    // 요소
-    const openLoginBtn = document.getElementById('openLoginBtn');
-    const loginModal   = document.getElementById('loginModal');
-    const closeLoginBtn = document.getElementById('closeLoginBtn');
-    const modalLoginBtn = document.getElementById('modalLoginBtn');
-    const startBtn = document.getElementById('startBtn');
-
-    // 모달 열기
-    openLoginBtn.addEventListener('click', () => {
-      loginModal.classList.add('show');
-      loginModal.setAttribute('aria-hidden','false');
-      // 포커스 접근성: 이메일 필드에 포커스
-      setTimeout(()=> document.getElementById('email').focus(), 80);
-    });
-
-    // 모달 닫기 (닫기 버튼)
-    closeLoginBtn.addEventListener('click', () => {
-      loginModal.classList.remove('show');
-      loginModal.setAttribute('aria-hidden','true');
-    });
-
-    // 모달 닫기 (오버레이 클릭)
-    loginModal.addEventListener('click', (e) => {
-      if (e.target === loginModal) {
-        loginModal.classList.remove('show');
-        loginModal.setAttribute('aria-hidden','true');
-      }
-    });
-
-    // 데모: 로그인 버튼 클릭 처리 (실서버 연동 시 교체)
-    modalLoginBtn.addEventListener('click', () => {
-      const email = document.getElementById('email').value.trim();
-      const pwd   = document.getElementById('password').value;
-      if (!email || !pwd) {
-        alert('이메일과 비밀번호를 입력하세요.');
-        return;
-      }
-      // 여기서 실제 인증 호출 가능 (fetch)
-      alert('데모 로그인 성공: ' + email);
-      // 모달 닫기
-      loginModal.classList.remove('show');
-      loginModal.setAttribute('aria-hidden','true');
-    });
-
-    // Get Started 버튼: analyze.html로 이동
-    startBtn.addEventListener('click', () => {
-      // analyze.html 파일이 같은 경로에 존재해야 합니다.
-      window.location.href = 'analyze.html';
-    });
-
-    // 키보드 ESC로 모달 닫기
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && loginModal.classList.contains('show')) {
-        loginModal.classList.remove('show');
-        loginModal.setAttribute('aria-hidden','true');
-      }
+    document.getElementById("startBtn").addEventListener("click", function() {
+      window.location.href = "analyze.html";
     });
   </script>
 </body>
