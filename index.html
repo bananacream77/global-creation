@@ -90,5 +90,80 @@
       window.location.href = "analyze.html";
     });
   </script>
+  <!-- LOGIN BUTTON (페이지 상단 등 원하는 위치에 넣기) -->
+<button id="loginBtn" class="btn" style="margin-left:12px;">로그인</button>
+
+<!-- LOGIN MODAL (body 끝에 추가) -->
+<div id="loginModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:9999;">
+  <div style="width:360px;background:#fff;padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+    <h3 style="margin:0 0 8px 0;">로그인</h3>
+    <div style="margin-bottom:10px;">
+      <input id="loginId" placeholder="아이디" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:8px;" />
+    </div>
+    <div style="margin-bottom:14px;">
+      <input id="loginPw" placeholder="비밀번호" type="password" style="width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:8px;" />
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button id="loginCancel" class="btn" style="background:#eee;color:#222;border:none;">취소</button>
+      <button id="loginSubmit" class="btn">로그인</button>
+    </div>
+    <p style="font-size:12px;color:#6b7280;margin-top:10px;">(데모) 아이디: <code>user</code>, 비밀번호: <code>pass</code></p>
+  </div>
+</div>
+
+<script>
+  // ---- 모의 로그인 (클라이언트에서 처리) ----
+  const loginBtn = document.getElementById('loginBtn');
+  const loginModal = document.getElementById('loginModal');
+  const loginCancel = document.getElementById('loginCancel');
+  const loginSubmit = document.getElementById('loginSubmit');
+
+  loginBtn.addEventListener('click', ()=> loginModal.style.display = 'flex');
+  loginCancel.addEventListener('click', ()=> loginModal.style.display = 'none');
+
+  // 로그인 성공시 토큰 저장 & UI 변경
+  function onLoginSuccess(token, username){
+    // 예: 로컬스토리지에 JWT 저장
+    localStorage.setItem('fd_token', token);
+    localStorage.setItem('fd_user', username);
+    loginModal.style.display = 'none';
+    // 로그인 상태 반영 (예: 버튼 텍스트 변경)
+    loginBtn.textContent = username + ' 님 (로그아웃)';
+    loginBtn.onclick = logout;
+    alert('로그인 성공 (데모): ' + username);
+  }
+
+  function logout(){
+    localStorage.removeItem('fd_token');
+    localStorage.removeItem('fd_user');
+    loginBtn.textContent = '로그인';
+    loginBtn.onclick = ()=> loginModal.style.display = 'flex';
+    location.reload();
+  }
+
+  // 초기 상태 반영
+  const existingUser = localStorage.getItem('fd_user');
+  if (existingUser){
+    loginBtn.textContent = existingUser + ' 님 (로그아웃)';
+    loginBtn.onclick = logout;
+  } else {
+    loginBtn.onclick = ()=> loginModal.style.display = 'flex';
+  }
+
+  // 실제 로그인 버튼 동작: 데모 검증 (아이디=user, pw=pass)
+  loginSubmit.addEventListener('click', ()=>{
+    const id = document.getElementById('loginId').value.trim();
+    const pw = document.getElementById('loginPw').value.trim();
+    // 데모용 검증: user / pass
+    if (id === 'user' && pw === 'pass'){
+      // 데모 토큰(실제로는 서버에서 발급)
+      const demoToken = 'demo.jwt.token';
+      onLoginSuccess(demoToken, id);
+    } else {
+      alert('로그인 실패: 아이디/비밀번호가 올바르지 않습니다.');
+    }
+  });
+</script>
+
 </body>
 </html>
