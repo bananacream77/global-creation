@@ -4,159 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deefy — 딥페이크 탐지</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: "Pretendard", "Noto Sans KR", sans-serif;
-    }
-    body {
-      margin: 0;
-      background: linear-gradient(135deg, #b3f0ff, #b2fff0);
-      color: #033a45;
-      transition: background 1s ease;
-    }
-
-    /* 상단 네비게이션 */
-    .nav {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      padding: 20px 40px;
-    }
-
-    .nav button {
-      border: none;
-      background-color: rgba(255, 255, 255, 0.6);
-      color: #033a45;
-      padding: 10px 22px;
-      border-radius: 9999px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      backdrop-filter: blur(5px);
-    }
-
-    .nav button:hover {
-      background-color: rgba(255, 255, 255, 0.8);
-      transform: scale(1.05);
-    }
-
-    /* 메인 섹션 */
-    .main {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 85vh;
-      text-align: center;
-      animation: fadeIn 1.2s ease;
-    }
-
-    .date {
-      font-size: 15px;
-      color: #055a68;
-      margin-bottom: 10px;
-    }
-
-    .title {
-      font-size: 70px;
-      font-weight: 800;
-      margin: 0;
-      margin-bottom: 40px;
-      color: #024954;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .btn-main {
-      background-color: #00c2a8;
-      color: white;
-      border: none;
-      border-radius: 9999px;
-      padding: 14px 32px;
-      font-size: 17px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 6px 14px rgba(0, 194, 168, 0.3);
-    }
-
-    .btn-main:hover {
-      background-color: #00d3b5;
-      transform: scale(1.05);
-      box-shadow: 0 8px 18px rgba(0, 194, 168, 0.4);
-    }
-
-    .btn-sub {
-      background: none;
-      border: none;
-      color: #03586b;
-      font-size: 17px;
-      cursor: pointer;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: color 0.3s;
-    }
-
-    .btn-sub:hover {
-      text-decoration: underline;
-      color: #048c9e;
-    }
-
-    footer {
-      text-align: center;
-      color: #04626d;
-      font-size: 14px;
-      padding: 20px 0;
-      opacity: 0.8;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 768px) {
-      .title {
-        font-size: 48px;
-      }
-      .btn-group {
-        flex-direction: column;
-        gap: 15px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
 </head>
-<body>
-  <!-- 상단 네비게이션 -->
   <div class="nav">
     <button onclick="alert('로그인 기능은 아직 준비 중입니다.')">로그인</button>
   </div>
-
-  <!-- 메인 콘텐츠 -->
-  <main class="main">
-    <h1 class="title">Deefy</h1>
-
-    <div class="btn-group">
-      <button class="btn-main" onclick="goAnalyze()">Get Started →</button>
-      <button class="btn-sub" onclick="alert('Pro 버전은 추후 공개 예정입니다.')">
+<body class="intro">
+  <div class="intro-container">
+    <div class="logo-box">
+      <div class="logo">Deefy</div>
+      <div class="tagline typing">AI 기반 딥페이크 탐지 시스템</div>
+    </div>
+    <button class="start-btn" id="startBtn">Get Started →</button>
+    <button class="btn-sub" onclick="alert('Pro 버전은 추후 공개 예정입니다.')">
         업무용 Deefy Pro 사용해보기 →
       </button>
-    </div>
-  </main>
-
-  <footer>© 2025 Team Global Creation</footer>
-
-  <script>
-    function goAnalyze() {
-      window.location.href = "analyze.html";
-    }
-  </script>
+  </div>
 </body>
 </html>
