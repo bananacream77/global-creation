@@ -3,492 +3,167 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Deefy — 딥페이크 탐지 </title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800&family=Orbitron:wght@500&display=swap" rel="stylesheet">
-
-  <style>
-    :root{
-      --bg-1: #f3f7fb;
-      --bg-2: #eef5fb;
-      --card: #ffffff;
-      --muted: #7b8794;
-      --accent-start: #1976ff;
-      --accent-end: #4fb0ff;
-      --glass: rgba(255,255,255,0.7);
-      --shadow: 0 10px 30px rgba(17,24,39,0.06);
-      --radius: 14px;
-    }
-
-    html,body{height:100%; margin:0; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-    body{
-      background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
-      color: #0b1220;
-      -webkit-font-smoothing:antialiased;
-      padding:40px;
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
-    }
-
-    .container{
-      width:100%;
-      max-width:1180px;
-    }
-
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:28px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-    }
-
-    .logo {
-      width:68px;
-      height:68px;
-      border-radius:16px;
-      background: linear-gradient(135deg,var(--accent-start),var(--accent-end));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      font-weight:800;
-      box-shadow: 0 12px 30px rgba(79,176,255,0.14);
-      font-family: "Orbitron", sans-serif;
-      font-size:20px;
-    }
-
-    .brand-text h1{
-      margin:0;
-      font-size:20px;
-      letter-spacing:0.4px;
-    }
-    .brand-text p{margin:4px 0 0 0; color:var(--muted); font-size:13px;}
-
-    /* header right: small hamburger */
-    .top-actions{
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .hamburger {
-      width:44px;
-      height:44px;
-      border-radius:10px;
-      border:none;
-      background: transparent;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-    }
-    .hamburger .bar{
-      width:20px;height:2px;background:rgba(16,24,39,0.18);
-      position:relative;
-      transition:0.25s;
-      display:block;
-    }
-    .hamburger .bar:before, .hamburger .bar:after{
-      content:'';
-      position:absolute;
-      left:0; right:0;
-      height:2px; background:rgba(16,24,39,0.18);
-      transition:0.25s;
-    }
-    .hamburger .bar:before{top:-6px;}
-    .hamburger .bar:after{bottom:-6px;}
-
-    /* layout */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 420px;
-      gap:26px;
-      align-items:start;
-    }
-
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      padding:22px;
-      box-shadow:var(--shadow);
-    }
-
-    /* uploader */
-    .drop{
-      border:2px dashed rgba(15,23,42,0.06);
-      border-radius:12px;
-      padding:28px;
-      text-align:center;
-      background: linear-gradient(180deg, rgba(251,253,255,0.8), transparent);
-    }
-    .drop h2{margin:0 0 8px 0; font-size:18px;}
-    .drop .sub{color:var(--muted); font-size:13px; margin-bottom:14px;}
-    .pick{
-      display:inline-block;
-      padding:10px 18px;
-      border-radius:12px;
-      background: linear-gradient(180deg,var(--accent-start),var(--accent-end));
-      color:white;
-      font-weight:700;
-      box-shadow:0 8px 22px rgba(25,118,255,0.12);
-      cursor:pointer;
-      border: none;
-    }
-
-    /* --- 🌟 [수정됨] 2번 코드의 미리보기 스타일 적용 --- */
-    #preview{
-      margin-top:18px;
-      width: 100%;
-      max-height: 480px; /* 최대 높이 제한 */
-      border-radius: var(--radius); /* 1번 코드의 테마 변수 사용 */
-      background: #050505; /* 1번 코드의 배경색 사용 */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-      overflow: hidden;
-      min-height: 200px; /* 최소 높이 설정 */
-    }
-    #preview video, 
-    #preview img {
-      width: 100%; /* [핵심] 가로 폭을 꽉 채움 */
-      height: auto; /* [핵심] 비율 유지를 위해 높이는 자동으로 */
-      display: block;
-      max-height: 480px; /* 컨테이너 최대 높이와 맞춤 */
-    }
-    /* --- 🌟 수정 끝 --- */
-
-
-    .controls{
-      margin-top:18px;
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .btn-primary{
-      padding:10px 16px;
-      border-radius:12px;
-      background: linear-gradient(180deg,var(--accent-start),var(--accent-end));
-      color:white; font-weight:700; border:none; cursor:pointer;
-      box-shadow:0 8px 26px rgba(25,118,255,0.12);
-    }
-    .status{
-      background:#f3f6fb;
-      color:var(--muted);
-      padding:10px 12px;
-      border-radius:10px;
-      font-size:13px;
-    }
-    .note{color:var(--muted); margin-top:12px; font-size:13px;}
-
-    /* right panel - result card (1번 코드 스타일 유지) */
-    .result-card h3{margin:0; font-size:20px;}
-    .result-body{margin-top:12px;}
-    .score{
-      font-size:48px;
-      font-weight:800;
-      margin:10px 0;
-    }
-    .score-label{
-      display:inline-block;
-      padding:8px 12px;
-      border-radius:999px;
-      color:white;
-      font-weight:700;
-      font-size:13px;
-    }
-    .fake{background:#ef4444;}
-    .real{background:#10b981;}
-
-    .progress{
-      height:12px;
-      background:#eef6ff;
-      border-radius:999px;
-      overflow:hidden;
-      margin-top:12px;
-    }
-    .progress > i{
-      display:block;
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg,var(--accent-start),var(--accent-end));
-      transition:width 600ms ease;
-    }
-    .evidence{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
-    .thumb{width:110px;height:70px;border-radius:10px;background:#111;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;}
-
-    footer{margin-top:28px;color:var(--muted); font-size:13px; display:flex; justify-content:space-between; align-items:center;}
-
-    /* Menu slide panel (1번 코드 기능 유지) */
-    .side-menu {
-      position:fixed;
-      right:0;
-      top:0;
-      width:360px;
-      height:100%;
-      background: linear-gradient(180deg,#071222 0%, #07202b 100%);
-      color:white;
-      transform: translateX(110%);
-      transition: transform 360ms cubic-bezier(.2,.9,.2,1);
-      z-index:1200;
-      padding:28px;
-      display:flex;
-      flex-direction:column;
-    }
-    .side-menu.open { transform: translateX(0%); }
-    .side-menu .close {
-      align-self:flex-end; cursor:pointer; font-size:22px;
-    }
-    .side-menu .menu-list { margin-top:30px; display:flex;flex-direction:column; gap:22px; }
-    .side-menu .menu-item {
-      display:flex; justify-content:space-between; align-items:center;
-      font-family:"Orbitron",sans-serif;
-      font-weight:700;
-      font-size:20px;
-      text-transform:uppercase;
-      cursor:pointer;
-      padding:8px 0;
-      border-bottom:1px solid rgba(255,255,255,0.03);
-    }
-    .side-menu .submenu { display:none; margin-top:8px; color:#9fb1bd; font-weight:600; padding-left:6px; font-size:14px; }
-    .side-menu .submenu.show { display:block; }
-
-    /* responsive */
-    @media (max-width:980px){
-      .grid { grid-template-columns: 1fr; }
-      .side-menu { width:100%; transform: translateX(110%); }
-    }
-
-  </style>
+  <title>Deefy — 딥페이크 탐지</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <div class="container">
+<body class="analyze">
+  <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo"> FD </div>
-        <div class="brand-text">
-          <h1>Deefy — 딥페이크 탐지</h1>
-          <p>영상 업로드 후 AI가 진위확률을 판정합니다.</p>
+        <div class="logo">FD</div>
+        <div>
+          <h1>Deefy — 딥페이크 탐지 데모</h1>
+          <p class="lead">영상 업로드 후 AI가 진위 여부를 판정합니다.</p>
         </div>
       </div>
-
-      <div class="top-actions">
-        <button class="hamburger" id="openMenu" aria-label="메뉴 열기">
-          <span class="bar"></span>
-        </button>
+      <div>
+        <a class="btn" id="aboutBtn">팀 소개</a>
       </div>
     </header>
 
-    <main class="grid">
+    <div class="grid">
+      <!-- 업로드 영역 -->
       <section class="card">
-        <div class="drop" id="dropZone">
-          <h2>파일을 드래그하거나 클릭하여 업로드하세요</h2>
-          <div class="sub">MP4, MOV, WEBM 등 (최대 100MB 권장)</div>
-          <button class="pick" id="pickBtn">파일 선택</button>
-          <input type="file" id="fileInput" accept="video/*,image/*" style="display:none;">
+        <div class="uploader" id="uploader">
+          <input type="file" id="fileInput" accept="video/*,image/*" />
+          <div>
+            <strong>파일을 드래그하거나 클릭하여 업로드하세요</strong>
+            <div class="muted">MP4, MOV, WEBM 등 (최대 100MB 권장)</div>
+            <button class="btn" id="pickBtn">파일 선택</button>
+          </div>
         </div>
 
-        <div id="preview" aria-live="polite">미리보기가 여기에 표시됩니다</div>
+        <div id="preview" class="preview" style="margin-top:14px;">
+          <div style="color: #cbd5e1;">미리보기가 여기에 표시됩니다</div>
+        </div>
 
         <div class="controls">
-          <button class="btn-primary" id="analyzeBtn" disabled>분석 시작</button>
-          <div class="status" id="status">대기 중</div>
+          <button class="btn" id="analyzeBtn" disabled>분석 시작</button>
+          <div class="ghost" id="status">대기 중</div>
         </div>
 
+        <small class="note">※ 현재는 데모 모드입니다. 실제 모델과 연결하려면 서버 주소를 설정하세요.</small>
       </section>
 
-      <aside class="card result-card">
+      <!-- 결과 영역 -->
+      <aside class="card">
         <h3>분석 결과</h3>
-        <div class="result-body" id="resultArea">
-          <div style="color:var(--muted)">아직 분석이 이루어지지 않았습니다.</div>
+        <div id="resultArea" style="margin-top:8px;">
+          <div class="muted">아직 분석이 이루어지지 않았습니다.</div>
         </div>
+
+        <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff;">
+        <h4>빠른 설명</h4>
+        <p class="muted" style="margin:6px 0;">
+          - 비디오의 얼굴/입 모양·오디오 싱크·합성 아티팩트를 검사합니다.<br>
+          - 데모는 클라이언트 시뮬레이션 결과를 사용합니다.
+        </p>
       </aside>
-    </main>
+    </div>
 
     <footer>
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:center;">
+        <div>© Team Global Creation</div>
+        <div class="muted">배포: GitHub Pages / 실제 분석은 서버 연동 필요</div>
+      </div>
     </footer>
   </div>
 
-  <div class="side-menu" id="sideMenu" aria-hidden="true">
-    <div class="close" id="closeSide">✕</div>
-    <div style="margin-top:6px; font-weight:700; font-size:14px; color:#9ed1ff;">Team Global Creation</div>
-    <div style="font-size:20px;font-weight:800;margin-top:6px;">Introduction</div>
+  <script>
+    const uploader = document.getElementById('uploader');
+    const fileInput = document.getElementById('fileInput');
+    const pickBtn = document.getElementById('pickBtn');
+    const preview = document.getElementById('preview');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const status = document.getElementById('status');
+    const resultArea = document.getElementById('resultArea');
 
-    <div class="menu-list">
-      <div class="menu-item" data-target="m-cat">CATEGORY <span>⌄</span></div>
-      <div class="submenu" id="m-cat">
-        <div>소개 (About)</div>
-        <div>모델 (Model)</div>
-        <div>팀원 (Team)</div>
-      </div>
+    let currentFile = null;
 
-      <div class="menu-item" data-target="m-acc">MY ACCOUNT <span>⌄</span></div>
-      <div class="submenu" id="m-acc">
-        <div>로그인</div>
-        <div>프로필</div>
-      </div>
-
-      <div class="menu-item" data-target="m-price"> Price <span>⌄</span></div>
-      <div class="submenu" id="m-price">
-        <div>모델별 가격</div>
-        <div>설정</div>
-      </div>
-
-      <div class="menu-item" data-target="m-help">HELP <span>⌄</span></div>
-      <div class="submenu" id="m-help">
-        <div>FAQ</div>
-        <div>문의하기</div>
-      </div>
-    </div>
-  </div>
-
-<script>
-  // 간단 업로드/미리보기/데모 분석 로직
-  const fileInput = document.getElementById('fileInput');
-  const pickBtn = document.getElementById('pickBtn');
-  const dropZone = document.getElementById('dropZone');
-  const preview = document.getElementById('preview');
-  const analyzeBtn = document.getElementById('analyzeBtn');
-  const status = document.getElementById('status');
-  const resultArea = document.getElementById('resultArea');
-
-  let currentFile = null;
-
-  pickBtn.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-
-  // drag & drop
-  ['dragenter','dragover'].forEach(ev => {
-    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.style.boxShadow = '0 12px 30px rgba(25,118,255,0.06)'; });
-  });
-  ['dragleave','drop'].forEach(ev => {
-    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.style.boxShadow = 'none'; });
-  });
-  dropZone.addEventListener('drop', (e) => {
-    const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    handleFile(f);
-  });
-
-  function handleFile(file){
-    if(!file) return;
-    currentFile = file;
-    analyzeBtn.disabled = false;
-    // --- 🌟 [수정됨] 템플릿 리터럴 문법 오류 수정 (앞에 ` 추가) ---
-    status.textContent = `파일 준비됨 · ${Math.round(file.size/1024)} KB`;
-
-    preview.innerHTML = '';
-    if (file.type.startsWith('video')){
-      const url = URL.createObjectURL(file);
-      const v = document.createElement('video');
-      v.src = url; v.controls = true; v.muted = true; v.playsInline = true;
-      // --- 🌟 [수정됨] 2번 코드처럼 고정 높이 제거 ---
-      // v.style.height = '48px'; 
-      preview.appendChild(v);
-    } else if (file.type.startsWith('image')){
-      const url = URL.createObjectURL(file);
-      const img = document.createElement('img');
-      img.src = url;
-      // --- 🌟 [수정됨] 2번 코드처럼 고정 높이 제거 ---
-      // img.style.height = '48px';
-      preview.appendChild(img);
-    } else {
-      preview.textContent = '미리보기 불가한 파일입니다';
-    }
-  }
-
-  // 1번 코드의 데모 분석 로직 유지
-  analyzeBtn.addEventListener('click', async () => {
-    if(!currentFile) return;
-    analyzeBtn.disabled = true;
-    status.textContent = '분석 중...';
-    resultArea.innerHTML = '';
-
-    // 데모: 모의 처리
-    await sleep(600);
-    await simulateProgress();
-
-    const fakeProbability = Math.round((0.08 + Math.random()*0.9)*100); // 8~98
-    const isFake = fakeProbability > 50;
-    const data = {
-      prediction: fakeProbability/100,
-      label: isFake ? 'fake' : 'real',
-      model_version: 'demo-v0.2'
-    };
-    showResult(data);
-    analyzeBtn.disabled = false;
-    status.textContent = '완료';
-  });
-
-  // 1번 코드의 결과 표시 로직 유지
-  function showResult(data){
-    const pct = Math.round(data.prediction * 100);
-    const labelText = data.label === 'fake' ? '가짜 의심' : '진짜일 가능성 높음';
-    resultArea.innerHTML = `
-      <div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex;flex-direction:column;">
-            <div style="font-size:13px;color:var(--muted)">모델</div>
-            <div style="font-weight:700">${data.model_version}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="score">${pct}%</div>
-            <div class="score-label ${data.label === 'fake' ? 'fake' : 'real'}">${labelText}</div>
-          </div>
-        </div>
-        <div class="progress" aria-hidden><i style="width:${pct}%"></i></div>
-        <div style="margin-top:12px;color:var(--muted);font-size:13px;">신뢰도 수치(참고용)</div>
-        <div class="evidence" id="evidence">
-          <div class="thumb">F1</div>
-          <div class="thumb">F2</div>
-          <div class="thumb">F3</div>
-        </div>
-      </div>
-    `;
-  }
-
-  async function simulateProgress(){
-    const delays = [300, 500, 700, 300];
-    for (let d of delays) await sleep(d);
-  }
-  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-
-  // 1번 코드의 side menu controls 유지
-  const openMenu = document.getElementById('openMenu');
-  const sideMenu = document.getElementById('sideMenu');
-  const closeSide = document.getElementById('closeSide');
-
-  openMenu.addEventListener('click', ()=> {
-    sideMenu.classList.add('open');
-    sideMenu.setAttribute('aria-hidden','false');
-  });
-  closeSide.addEventListener('click', ()=>{
-    sideMenu.classList.remove('open');
-    sideMenu.setAttribute('aria-hidden','true');
-  });
-
-  // submenu toggle
-  document.querySelectorAll('.menu-item').forEach(mi=>{
-    mi.addEventListener('click', ()=>{
-      const id = mi.dataset.target;
-      const el = document.getElementById(id);
-      if(!el) return;
-      el.classList.toggle('show');
+    // 드래그 앤 드롭 업로드
+    ['dragenter', 'dragover'].forEach(evt => {
+      uploader.addEventListener(evt, e => {
+        e.preventDefault(); e.stopPropagation();
+        uploader.classList.add('dragover');
+      });
     });
-  });
+    ['dragleave', 'drop'].forEach(evt => {
+      uploader.addEventListener(evt, e => {
+        e.preventDefault(); e.stopPropagation();
+        uploader.classList.remove('dragover');
+      });
+    });
+    uploader.addEventListener('drop', e => {
+      const f = e.dataTransfer.files[0];
+      handleFile(f);
+    });
 
-  // close menu when clicking outside (for smaller screens)
-  window.addEventListener('click', (e)=>{
-    if(sideMenu.classList.contains('open') && !sideMenu.contains(e.target) && !openMenu.contains(e.target)){
-      sideMenu.classList.remove('open');
+    pickBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+    function handleFile(file) {
+      if (!file) return;
+      currentFile = file;
+      analyzeBtn.disabled = false;
+      status.textContent = `파일 준비됨 (${Math.round(file.size / 1024)} KB)`;
+      showPreview(file);
     }
-  });
-</script>
+
+    function showPreview(file) {
+      preview.innerHTML = '';
+      if (file.type.startsWith('video')) {
+        const url = URL.createObjectURL(file);
+        const video = document.createElement('video');
+        video.src = url;
+        video.controls = true;
+        video.muted = true;
+        video.playsInline = true;
+        preview.appendChild(video);
+      } else if (file.type.startsWith('image')) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        preview.appendChild(img);
+      } else {
+        preview.textContent = '미리보기 불가한 파일입니다.';
+      }
+    }
+
+    analyzeBtn.addEventListener('click', async () => {
+      if (!currentFile) return;
+      analyzeBtn.disabled = true;
+      status.textContent = '분석 중...';
+      resultArea.innerHTML = '';
+
+      await sleep(700); // 가짜 분석 대기
+
+      const fakeProbability = Math.round((0.1 + Math.random() * 0.8) * 100);
+      const isFake = fakeProbability > 50;
+      showResult({
+        prediction: fakeProbability / 100,
+        label: isFake ? 'fake' : 'real'
+      });
+
+      analyzeBtn.disabled = false;
+      status.textContent = '완료';
+    });
+
+    function showResult(data) {
+      const pct = Math.round(data.prediction * 100);
+      const label = data.label === 'fake' ? '가짜 의심' : '진짜 가능성 높음';
+      resultArea.innerHTML = `
+        <div class="result-score">${pct}%</div>
+        <div class="result-label ${data.label === 'fake' ? 'label-fake' : 'label-real'}">${label}</div>
+        <div class="bar"><div class="fill" style="width:${pct}%;"></div></div>
+      `;
+    }
+
+    function sleep(ms) {
+      return new Promise(res => setTimeout(res, ms));
+    }
+
+    document.getElementById('aboutBtn').addEventListener('click', () => {
+      alert('Team Global Creation — Deefy 딥페이크 탐지 데모입니다.');
+    });
+  </script>
 </body>
 </html>
